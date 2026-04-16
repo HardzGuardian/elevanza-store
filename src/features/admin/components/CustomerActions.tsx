@@ -26,6 +26,7 @@ interface CustomerActionsProps {
 export function CustomerActions({ customer }: CustomerActionsProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState(customer.role);
 
   async function handleCopyEmail() {
     try {
@@ -42,7 +43,7 @@ export function CustomerActions({ customer }: CustomerActionsProps) {
 
     if (result.success) {
       toast.success(nextRole === 'admin' ? 'Customer promoted to admin.' : 'Admin changed back to customer.');
-      router.push('/admin/customers');
+      setRole(nextRole);
     } else {
       toast.error(result.error || 'Role update failed.');
     }
@@ -69,7 +70,7 @@ export function CustomerActions({ customer }: CustomerActionsProps) {
           Send Email
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        {customer.role === 'admin' ? (
+        {role === 'admin' ? (
           <DropdownMenuItem onClick={() => handleRoleChange('customer')}>
             <UserRound className="w-4 h-4 mr-2" />
             Make Customer

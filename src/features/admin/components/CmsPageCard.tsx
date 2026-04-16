@@ -22,7 +22,7 @@ interface CmsPageCardProps {
 
 export function CmsPageCard({ page }: CmsPageCardProps) {
   const router = useRouter();
-  const isVisible = page.isVisible ?? true;
+  const [isVisible, setIsVisible] = useState(page.isVisible ?? true);
   const [pending, setPending] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -31,7 +31,7 @@ export function CmsPageCard({ page }: CmsPageCardProps) {
     const result = await togglePageVisibility(page.slug, !isVisible);
     if (result.success) {
       toast.success(!isVisible ? 'Page is visible on the site now.' : 'Page hidden from the site.');
-      router.push('/admin/pages');
+      setIsVisible(prev => !prev);
     } else {
       toast.error(result.error || 'Failed to update page visibility.');
     }

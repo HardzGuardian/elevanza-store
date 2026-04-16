@@ -8,7 +8,7 @@ import { STOREFRONT_TAGS, getQuickProductSearchResults } from "@/features/shop/s
 
 export async function createProduct(data: any) {
   try {
-    await db.insert(products).values({
+    const [product] = await db.insert(products).values({
       name: data.name,
       description: data.description,
       price: data.price.toString(),
@@ -19,21 +19,21 @@ export async function createProduct(data: any) {
       isNewArrival: data.isNewArrival,
       isSale: data.isSale,
       salePercentage: data.salePercentage?.toString(),
-    });
+    }).returning();
 
     revalidatePath("/admin/products");
     revalidatePath("/products");
     revalidateTag(STOREFRONT_TAGS.products, {});
-    return { success: true };
+    return { success: true, product };
   } catch (error) {
     console.error("Failed to create product:", error);
-    return { success: false, error: "Failed to create product" };
+    return { success: false, error: "Failed to create product", product: null };
   }
 }
 
 export async function updateProduct(id: number, data: any) {
   try {
-    await db.update(products).set({
+    const [product] = await db.update(products).set({
       name: data.name,
       description: data.description,
       price: data.price.toString(),
@@ -44,16 +44,16 @@ export async function updateProduct(id: number, data: any) {
       isNewArrival: data.isNewArrival,
       isSale: data.isSale,
       salePercentage: data.salePercentage?.toString(),
-    }).where(eq(products.id, id));
+    }).where(eq(products.id, id)).returning();
 
     revalidatePath("/admin/products");
     revalidatePath("/products");
     revalidatePath(`/products/${id}`);
     revalidateTag(STOREFRONT_TAGS.products, {});
-    return { success: true };
+    return { success: true, product };
   } catch (error) {
     console.error("Failed to update product:", error);
-    return { success: false, error: "Failed to update product" };
+    return { success: false, error: "Failed to update product", product: null };
   }
 }
 

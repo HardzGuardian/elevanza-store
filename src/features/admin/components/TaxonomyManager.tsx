@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -30,7 +29,6 @@ interface TaxonomyManagerProps {
 }
 
 export function TaxonomyManager({ initialCategories, initialFestivals }: TaxonomyManagerProps) {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'categories' | 'festivals'>('categories');
   const [categoriesList, setCategoriesList] = useState(initialCategories);
   const [festivalsList, setFestivalsList] = useState(initialFestivals);
@@ -43,10 +41,10 @@ export function TaxonomyManager({ initialCategories, initialFestivals }: Taxonom
     if (!newCatName) return;
     const slug = newCatName.toLowerCase().replace(/ /g, '-');
     const result = await createCategory({ name: newCatName, slug });
-    if (result.success) {
+    if (result.success && result.category) {
       toast.success('Category created!');
       setNewCatName('');
-      router.push('/admin/taxonomy');
+      setCategoriesList(prev => [...prev, result.category]);
     }
   };
 
@@ -55,7 +53,7 @@ export function TaxonomyManager({ initialCategories, initialFestivals }: Taxonom
       const result = await deleteCategory(id);
       if (result.success) {
         toast.success('Category removed');
-        router.push('/admin/taxonomy');
+        setCategoriesList(prev => prev.filter(c => c.id !== id));
       }
     }
   };
@@ -72,10 +70,10 @@ export function TaxonomyManager({ initialCategories, initialFestivals }: Taxonom
       accentColor: '#ef4444',
       promoMessage: `Celebrate ${newFestName} with exclusive deals!`
     });
-    if (result.success) {
+    if (result.success && result.festival) {
       toast.success('Festival event added!');
       setNewFestName('');
-      router.push('/admin/taxonomy');
+      setFestivalsList(prev => [...prev, result.festival]);
     }
     setFestLoading(false);
   };
@@ -84,7 +82,9 @@ export function TaxonomyManager({ initialCategories, initialFestivals }: Taxonom
     const result = await toggleFestival(id, active);
     if (result.success) {
       toast.success(active ? 'Festival activated!' : 'Festival deactivated');
-      router.push('/admin/taxonomy');
+      setFestivalsList(prev => prev.map(f =>
+        active ? { ...f, isActive: f.id === id } : f.id === id ? { ...f, isActive: false } : f
+      ));
     }
   };
 
@@ -93,7 +93,7 @@ export function TaxonomyManager({ initialCategories, initialFestivals }: Taxonom
       const result = await deleteFestival(id);
       if (result.success) {
         toast.success('Festival deleted');
-        router.push('/admin/taxonomy');
+        setFestivalsList(prev => prev.filter(f => f.id !== id));
       }
     }
   };

@@ -14,7 +14,7 @@ const QUICK_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '36', '38', '40', '42', '
 
 interface ProductFormProps {
   initialData?: any;
-  onSuccess?: () => void;
+  onSuccess?: (product: any) => void;
   categoriesList: any[];
 }
 
@@ -56,7 +56,7 @@ export function ProductForm({ initialData, onSuccess, categoriesList }: ProductF
 
     if (result.success) {
       toast.success(initialData ? 'Product updated!' : 'Product created!');
-      onSuccess?.();
+      onSuccess?.(result.product);
     } else {
       toast.error(result.error || 'Something went wrong');
     }

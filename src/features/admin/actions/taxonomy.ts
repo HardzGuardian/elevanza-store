@@ -13,14 +13,14 @@ export async function getCategories() {
 
 export async function createCategory(data: { name: string; slug: string; image?: string }) {
   try {
-    await db.insert(categories).values(data);
+    const [category] = await db.insert(categories).values(data).returning();
     revalidatePath("/admin/taxonomy");
     revalidatePath("/products");
     revalidateTag(STOREFRONT_TAGS.categories, {});
-    return { success: true };
+    return { success: true, category };
   } catch (error) {
     console.error("Failed to create category:", error);
-    return { success: false };
+    return { success: false, category: null };
   }
 }
 
@@ -44,14 +44,14 @@ export async function getFestivals() {
 
 export async function createFestival(data: any) {
   try {
-    await db.insert(festivals).values(data);
+    const [festival] = await db.insert(festivals).values(data).returning();
     revalidatePath("/admin/taxonomy");
     revalidatePath("/");
     revalidateTag(STOREFRONT_TAGS.festivals, {});
-    return { success: true };
+    return { success: true, festival };
   } catch (error) {
     console.error("Failed to create festival:", error);
-    return { success: false };
+    return { success: false, festival: null };
   }
 }
 

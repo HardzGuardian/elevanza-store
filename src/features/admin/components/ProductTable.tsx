@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Plus, Pencil, Trash2, Search } from 'lucide-react';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Input } from '@/components/ui/input';
@@ -17,12 +16,12 @@ interface ProductTableProps {
 }
 
 export function ProductTable({ products: initialProducts, categoriesList }: ProductTableProps) {
-  const router = useRouter();
+  const [products, setProducts]               = useState(initialProducts);
   const [isAddOpen,       setIsAddOpen]       = useState(false);
   const [editingProduct,  setEditingProduct]  = useState<any>(null);
   const [searchQuery,     setSearchQuery]     = useState('');
 
-  const filtered = initialProducts.filter(p =>
+  const filtered = products.filter(p =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -32,7 +31,7 @@ export function ProductTable({ products: initialProducts, categoriesList }: Prod
     const result = await deleteProduct(id);
     if (result.success) {
       toast.success('Product deleted');
-      router.push('/admin/products');
+      setProducts(prev => prev.filter(p => p.id !== id));
     } else {
       toast.error('Failed to delete');
     }
@@ -61,7 +60,7 @@ export function ProductTable({ products: initialProducts, categoriesList }: Prod
               <DialogHeader className="mb-6">
                 <DialogTitle className="text-xl font-bold text-neutral-900">Add New Product</DialogTitle>
               </DialogHeader>
-              <ProductForm onSuccess={() => { setIsAddOpen(false); router.push('/admin/products'); }} categoriesList={categoriesList} />
+              <ProductForm onSuccess={(product) => { setIsAddOpen(false); if (product) setProducts(prev => [product, ...prev]); }} categoriesList={categoriesList} />
             </div>
           </DialogContent>
         </Dialog>
@@ -168,7 +167,7 @@ export function ProductTable({ products: initialProducts, categoriesList }: Prod
                             </DialogHeader>
                             <ProductForm
                               initialData={product}
-                              onSuccess={() => { setEditingProduct(null); router.push('/admin/products'); }}
+                              onSuccess={(product) => { setEditingProduct(null); if (product) setProducts(prev => prev.map(p => p.id === product.id ? product : p)); }}
                               categoriesList={categoriesList}
                             />
                           </div>
