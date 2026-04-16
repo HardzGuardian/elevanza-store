@@ -47,31 +47,63 @@ function StatusBadge({ status }: { status: string | null }) {
 function OrderTracker({ status }: { status: string | null }) {
   if (!status || status === 'pending' || status === 'cancelled') return null;
 
-  const currentIdx = getStepIndex(status);
+  const currentIdx  = getStepIndex(status);
+  const totalSteps  = PIPELINE.length - 1;
+  const progressPct = Math.round((currentIdx / totalSteps) * 100);
 
   return (
-    <div className="px-5 py-4 border-t border-neutral-100">
-      <div className="relative flex items-start justify-between gap-0">
-        {/* connector line */}
-        <div className="absolute top-3.5 left-0 right-0 h-px bg-neutral-200 mx-[10%]" />
+    <div className="px-5 pt-4 pb-5 border-t border-neutral-100 bg-white">
+      {/* Label row */}
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400">
+          Order Tracking
+        </p>
+        <p className="text-[10px] font-semibold text-neutral-500">
+          Step {currentIdx + 1} of {PIPELINE.length}
+        </p>
+      </div>
 
+      {/* Progress bar track */}
+      <div className="relative">
+        {/* Background track */}
+        <div className="h-1.5 w-full rounded-full bg-neutral-100" />
+        {/* Filled bar */}
+        <div
+          className="absolute top-0 left-0 h-1.5 rounded-full bg-neutral-900 transition-all duration-500"
+          style={{ width: `${progressPct}%` }}
+        />
+
+        {/* Step dots on the bar */}
+        <div className="absolute top-0 left-0 right-0 flex justify-between -mt-[5px]">
+          {PIPELINE.map((step, idx) => {
+            const done    = idx <= currentIdx;
+            const current = idx === currentIdx;
+            const Icon    = step.icon;
+            return (
+              <div key={step.key} className="flex flex-col items-center">
+                <div className={`w-5 h-5 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                  done
+                    ? 'bg-neutral-900 border-neutral-900 text-white'
+                    : 'bg-white border-neutral-200 text-neutral-300'
+                } ${current ? 'ring-2 ring-offset-1 ring-neutral-400 scale-110' : ''}`}>
+                  <Icon className="w-2.5 h-2.5" />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Step labels */}
+      <div className="flex justify-between mt-5">
         {PIPELINE.map((step, idx) => {
           const done    = idx <= currentIdx;
           const current = idx === currentIdx;
-          const Icon    = step.icon;
-
           return (
-            <div key={step.key} className="relative flex flex-col items-center gap-1.5 flex-1 z-10">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all ${
-                done
-                  ? 'bg-neutral-900 border-neutral-900 text-white'
-                  : 'bg-white border-neutral-200 text-neutral-300'
-              } ${current ? 'ring-2 ring-offset-2 ring-neutral-400' : ''}`}>
-                <Icon className="w-3 h-3" />
-              </div>
-              <p className={`text-center text-[9px] font-semibold uppercase tracking-[0.08em] leading-tight max-w-[60px] ${
-                done ? 'text-neutral-700' : 'text-neutral-300'
-              } ${current ? 'text-neutral-900' : ''}`}>
+            <div key={step.key} className={`flex-1 text-center ${idx === 0 ? 'text-left' : idx === PIPELINE.length - 1 ? 'text-right' : ''}`}>
+              <p className={`text-[9px] font-semibold uppercase tracking-[0.06em] leading-tight transition-colors ${
+                current ? 'text-neutral-900' : done ? 'text-neutral-500' : 'text-neutral-300'
+              }`}>
                 {step.label}
               </p>
             </div>
