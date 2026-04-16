@@ -24,7 +24,7 @@ export const authConfig = {
       const isAdmin = auth?.user?.role === "admin";
       
       const isAdminRoute = nextUrl.pathname.startsWith("/admin");
-      const isProtectedRoute = nextUrl.pathname.startsWith("/cart") || nextUrl.pathname.startsWith("/account");
+      const isProtectedRoute = nextUrl.pathname.startsWith("/account");
 
       if (isAdminRoute) {
         if (!isLoggedIn) return false;
