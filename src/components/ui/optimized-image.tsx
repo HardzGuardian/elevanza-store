@@ -46,7 +46,7 @@ export function OptimizedImage({ src, className, fill, priority, ...props }: Opt
           className={cn(
             'duration-700 ease-in-out transition-all',
             fill ? 'object-cover' : '',
-            props.className
+            className
           )}
           {...(props as any)}
         />
