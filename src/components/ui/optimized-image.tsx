@@ -26,7 +26,7 @@ function ImagePlaceholder({ fill, className }: { fill?: boolean; className?: str
   );
 }
 
-export function OptimizedImage({ src, className, fill, priority, ...props }: OptimizedImageProps) {
+export function OptimizedImage({ src, className, fill, priority, alt, ...props }: OptimizedImageProps) {
   if (!src) return <ImagePlaceholder fill={fill} className={className} />;
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
@@ -40,7 +40,7 @@ export function OptimizedImage({ src, className, fill, priority, ...props }: Opt
       <div className={cn('relative overflow-hidden', fill ? 'h-full w-full' : '', className)}>
         <Image
           src={src}
-          alt={props.alt || 'Image'}
+          alt={alt || 'Image'}
           fill={fill}
           priority={priority}
           className={cn(
@@ -59,13 +59,13 @@ export function OptimizedImage({ src, className, fill, priority, ...props }: Opt
       <CldImage
         src={src}
         fill={fill}
-        loading={props.priority ? undefined : 'lazy'}
+        loading={priority ? undefined : 'lazy'}
         dpr="auto"
         format="auto"
         quality="auto"
         crop="fill"
         gravity="auto"
-        alt={props.alt || 'Image'}
+        alt={alt || 'Image'}
         {...props}
         className={cn(
           'duration-700 ease-in-out transition-all',
