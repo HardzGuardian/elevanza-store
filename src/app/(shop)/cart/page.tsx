@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { OptimizedImage } from '@/components/ui/optimized-image';
-import { Minus, Plus, Trash2, ArrowRight, ShoppingBag, Loader2, Gift } from 'lucide-react';
+import { Minus, Plus, Trash2, ArrowRight, ShoppingBag, Loader2, Gift, LogIn } from 'lucide-react';
 import { createCheckoutSession } from '@/features/checkout/actions/checkout';
 import { cancelPendingOrder } from '@/features/checkout/actions/order';
 import { toast } from 'react-hot-toast';
@@ -249,14 +249,24 @@ export default function CartPage() {
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
+                ) : session?.user ? (
                   <><span>Proceed to Checkout</span><ArrowRight className="w-4 h-4" /></>
+                ) : (
+                  <><LogIn className="w-4 h-4" /><span>Sign In & Checkout</span></>
                 )}
               </button>
 
-              <p className="text-[11px] text-center text-neutral-500 font-medium">
-                Secure payments powered by Stripe
-              </p>
+              {!session?.user && (
+                <p className="text-[11px] text-center text-neutral-500 font-medium">
+                  You'll be asked to sign in before payment
+                </p>
+              )}
+
+              {session?.user && (
+                <p className="text-[11px] text-center text-neutral-500 font-medium">
+                  Secure payments powered by Stripe
+                </p>
+              )}
             </div>
           </div>
 
