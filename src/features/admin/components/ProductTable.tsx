@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Plus, Pencil, Trash2, Search } from 'lucide-react';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Input } from '@/components/ui/input';
@@ -16,6 +17,7 @@ interface ProductTableProps {
 }
 
 export function ProductTable({ products: initialProducts, categoriesList }: ProductTableProps) {
+  const router = useRouter();
   const [isAddOpen,       setIsAddOpen]       = useState(false);
   const [editingProduct,  setEditingProduct]  = useState<any>(null);
   const [searchQuery,     setSearchQuery]     = useState('');
@@ -28,7 +30,12 @@ export function ProductTable({ products: initialProducts, categoriesList }: Prod
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this product?')) return;
     const result = await deleteProduct(id);
-    result.success ? toast.success('Product deleted') : toast.error('Failed to delete');
+    if (result.success) {
+      toast.success('Product deleted');
+      router.push('/admin/products');
+    } else {
+      toast.error('Failed to delete');
+    }
   };
 
   return (
@@ -54,7 +61,7 @@ export function ProductTable({ products: initialProducts, categoriesList }: Prod
               <DialogHeader className="mb-6">
                 <DialogTitle className="text-xl font-bold text-neutral-900">Add New Product</DialogTitle>
               </DialogHeader>
-              <ProductForm onSuccess={() => setIsAddOpen(false)} categoriesList={categoriesList} />
+              <ProductForm onSuccess={() => { setIsAddOpen(false); router.push('/admin/products'); }} categoriesList={categoriesList} />
             </div>
           </DialogContent>
         </Dialog>
@@ -161,7 +168,7 @@ export function ProductTable({ products: initialProducts, categoriesList }: Prod
                             </DialogHeader>
                             <ProductForm
                               initialData={product}
-                              onSuccess={() => setEditingProduct(null)}
+                              onSuccess={() => { setEditingProduct(null); router.push('/admin/products'); }}
                               categoriesList={categoriesList}
                             />
                           </div>

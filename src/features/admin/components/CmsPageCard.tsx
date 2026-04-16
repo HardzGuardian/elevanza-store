@@ -31,7 +31,7 @@ export function CmsPageCard({ page }: CmsPageCardProps) {
     const result = await togglePageVisibility(page.slug, !isVisible);
     if (result.success) {
       toast.success(!isVisible ? 'Page is visible on the site now.' : 'Page hidden from the site.');
-      router.refresh();
+      router.push('/admin/pages');
     } else {
       toast.error(result.error || 'Failed to update page visibility.');
     }

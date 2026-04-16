@@ -37,7 +37,7 @@ export function PageEditor({ page }: PageEditorProps) {
 
     if (result.success) {
       toast.success('Page updated successfully!');
-      router.refresh();
+      router.push(`/admin/pages/${page.slug}`);
     } else {
       toast.error('Failed to update page.');
     }

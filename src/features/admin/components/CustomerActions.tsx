@@ -42,7 +42,7 @@ export function CustomerActions({ customer }: CustomerActionsProps) {
 
     if (result.success) {
       toast.success(nextRole === 'admin' ? 'Customer promoted to admin.' : 'Admin changed back to customer.');
-      router.refresh();
+      router.push('/admin/customers');
     } else {
       toast.error(result.error || 'Role update failed.');
     }
