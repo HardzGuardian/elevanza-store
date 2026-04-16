@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useCart } from '@/features/cart/store';
-import { useWishlist } from '@/features/wishlist/store';
+import { useWishlist } from '@/features/wishlist/useWishlist';
 import { ShoppingBag, Heart, Share2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { cn } from '@/core/utils';
@@ -94,8 +94,8 @@ export function ProductSelection({ product }: ProductSelectionProps) {
               : 'border-neutral-200 text-neutral-500 hover:border-red-200 hover:text-red-500 hover:bg-red-50'
           }`}
           aria-label={wishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
-          onClick={() => {
-            toggle(product.id);
+          onClick={async () => {
+            await toggle(product.id);
             toast(wishlisted ? 'Removed from wishlist' : 'Saved to wishlist', {
               icon: wishlisted ? '🤍' : '❤️',
             });

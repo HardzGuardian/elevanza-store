@@ -4,7 +4,7 @@ import { OptimizedImage } from '@/components/ui/optimized-image';
 import Link from 'next/link';
 import { ShoppingBag, Heart } from 'lucide-react';
 import { useCart } from '@/features/cart/store';
-import { useWishlist } from '@/features/wishlist/store';
+import { useWishlist } from '@/features/wishlist/useWishlist';
 import { toast } from 'react-hot-toast';
 import { calculateBestPrice, formatPrice } from '@/features/shop/services/pricing';
 
@@ -26,6 +26,13 @@ export function ProductCard({
   const { addItem } = useCart();
   const { toggle, isWishlisted } = useWishlist();
   const wishlisted = isWishlisted(product.id);
+
+  const handleWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await toggle(product.id);
+    toast(wishlisted ? 'Removed from wishlist' : 'Saved to wishlist', { icon: wishlisted ? '🤍' : '❤️' });
+  };
 
   const pricing = calculateBestPrice(
     Number(product.price),
@@ -91,14 +98,7 @@ export function ProductCard({
           className={`absolute top-3 right-3 z-10 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center transition-all duration-200 hover:bg-white hover:scale-110 shadow-sm ${
             wishlisted ? 'opacity-100 translate-y-0' : 'opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0'
           }`}
-          onClick={e => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggle(product.id);
-            toast(wishlisted ? 'Removed from wishlist' : 'Saved to wishlist', {
-              icon: wishlisted ? '🤍' : '❤️',
-            });
-          }}
+          onClick={handleWishlist}
         >
           <Heart
             className="w-3.5 h-3.5 transition-colors"

@@ -13,6 +13,7 @@ import { cn } from "@/core/utils";
 import { EmergencyBanner } from "@/components/layout/EmergencyBanner";
 import { FestivalBanner } from "@/components/layout/FestivalBanner";
 import { getStorefrontShell } from "@/features/shop/services/data";
+import { WishlistSyncer } from "@/features/wishlist/WishlistSyncer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -86,6 +87,7 @@ export default async function RootLayout({
       >
         <AuthContext>
           <SupabaseRealtimeProvider>
+            <WishlistSyncer />
             <Toaster position="top-right" />
             {storeSettings?.showEmergencyNotice && storeSettings?.emergencyNoticeText && (
               <EmergencyBanner message={storeSettings.emergencyNoticeText} />

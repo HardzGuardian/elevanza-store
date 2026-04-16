@@ -140,6 +140,18 @@ export const settings = pgTable('settings', {
   updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow(),
 });
 
+export const wishlists = pgTable('wishlists', {
+  id:        serial('id').primaryKey(),
+  userId:    integer('user_id').notNull().references(() => users.id),
+  productId: integer('product_id').notNull().references(() => products.id),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
+});
+
+export const wishlistsRelations = relations(wishlists, ({ one }) => ({
+  user:    one(users,    { fields: [wishlists.userId],    references: [users.id]    }),
+  product: one(products, { fields: [wishlists.productId], references: [products.id] }),
+}));
+
 export const contentPages = pgTable('content_pages', {
   id: serial('id').primaryKey(),
   slug: varchar('slug', { length: 255 }).notNull().unique(),
