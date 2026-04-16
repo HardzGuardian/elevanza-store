@@ -56,7 +56,9 @@ first-time-setup.bat
 
 # Claude AI files
 CLAUDE.md
+AGENTS.md
 memory/
+.claude/
 
 # Misc project files
 Backup.md
