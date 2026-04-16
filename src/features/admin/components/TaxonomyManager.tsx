@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -29,6 +30,7 @@ interface TaxonomyManagerProps {
 }
 
 export function TaxonomyManager({ initialCategories, initialFestivals }: TaxonomyManagerProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'categories' | 'festivals'>('categories');
   const [categoriesList, setCategoriesList] = useState(initialCategories);
   const [festivalsList, setFestivalsList] = useState(initialFestivals);
@@ -44,13 +46,17 @@ export function TaxonomyManager({ initialCategories, initialFestivals }: Taxonom
     if (result.success) {
       toast.success('Category created!');
       setNewCatName('');
+      router.push('/admin/taxonomy');
     }
   };
 
   const handleDeleteCategory = async (id: number) => {
     if (confirm('Delete this category? Products in it may become unassigned.')) {
       const result = await deleteCategory(id);
-      if (result.success) toast.success('Category removed');
+      if (result.success) {
+        toast.success('Category removed');
+        router.push('/admin/taxonomy');
+      }
     }
   };
 
@@ -69,6 +75,7 @@ export function TaxonomyManager({ initialCategories, initialFestivals }: Taxonom
     if (result.success) {
       toast.success('Festival event added!');
       setNewFestName('');
+      router.push('/admin/taxonomy');
     }
     setFestLoading(false);
   };
@@ -77,13 +84,17 @@ export function TaxonomyManager({ initialCategories, initialFestivals }: Taxonom
     const result = await toggleFestival(id, active);
     if (result.success) {
       toast.success(active ? 'Festival activated!' : 'Festival deactivated');
+      router.push('/admin/taxonomy');
     }
   };
 
   const handleDeleteFestival = async (id: number) => {
     if (confirm('Permanently remove this festival event?')) {
       const result = await deleteFestival(id);
-      if (result.success) toast.success('Festival deleted');
+      if (result.success) {
+        toast.success('Festival deleted');
+        router.push('/admin/taxonomy');
+      }
     }
   };
 
