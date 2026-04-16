@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(grep -rn \"import.*from.*\\\\$\" /e/projects/Ecommerce/src --include=\"*.tsx\" --include=\"*.ts\")",
+      "Bash(grep -rn \"/\\\\*.*[😀-🫾].*\\\\*/\\\\|//.*[😀-🫾]\" /e/projects/Ecommerce/src --include=\"*.tsx\")",
+      "Bash(wc -l /e/projects/Ecommerce/src/app/api/webhooks/stripe/route.ts /e/projects/Ecommerce/src/app/api/auth/register/route.ts /e/projects/Ecommerce/src/app/api/active-festival/route.ts /e/projects/Ecommerce/src/app/api/auth/[...nextauth]/route.ts)",
+      "Bash(ls -la /e/projects/Ecommerce/src/core/db/schema*)",
+      "Bash(sed -i 's/ \\\\* 🏷️ Caching Strategy Configuration/ * Caching Strategy Configuration/' \"e:/projects/Ecommerce/src/features/shop/services/data.ts\")",
+      "Bash(sed -i 's/ \\\\* 📦 Product Queries/ * Product Queries/' \"e:/projects/Ecommerce/src/features/shop/services/data.ts\")",
+      "Bash(sed -i 's/ \\\\* 🔒 Internal: Admin Guard/ * Internal: Admin Guard/' \"e:/projects/Ecommerce/src/features/admin/actions/settings.ts\")",
+      "Bash(sed -i 's/ \\\\* 💾 Persistence: Save Store Configuration/ * Persistence: Save Store Configuration/' \"e:/projects/Ecommerce/src/features/admin/actions/settings.ts\")",
+      "Bash(sed -i 's/ \\\\* 📜 Settings Form Values/ * Settings Form Values/' \"e:/projects/Ecommerce/src/features/admin/components/SettingsForm.tsx\")",
+      "Bash(sed -i 's/ \\\\* 🛠️ Admin: Settings Form/ * Admin: Settings Form/' \"e:/projects/Ecommerce/src/features/admin/components/SettingsForm.tsx\")",
+      "Bash(sed -i 's/ \\\\* 🛠️ Internal Utility: Filter Normalization/ * Internal Utility: Filter Normalization/' \"e:/projects/Ecommerce/src/features/shop/services/data.ts\")",
+      "Bash(sed -i 's/ \\\\* 🏠 Core Storefront Shell/ * Core Storefront Shell/' \"e:/projects/Ecommerce/src/features/shop/services/data.ts\")"
+    ]
+  }
+}
