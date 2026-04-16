@@ -5,9 +5,7 @@ import { db } from '@/core/db';
 import { orders, orderItems, products } from '@/core/db/schema';
 import { eq, sql } from 'drizzle-orm';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-01-27' as any,
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 

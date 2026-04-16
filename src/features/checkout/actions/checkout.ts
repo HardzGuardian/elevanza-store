@@ -9,9 +9,7 @@ import { eq, inArray } from 'drizzle-orm';
 import { calculateBestPrice } from '@/features/shop/services/pricing';
 import { STOREFRONT_TAGS } from '@/features/shop/services/data';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-01-27' as any,
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 /**
  * Checkout Action: Live Stripe Mode
@@ -81,16 +79,17 @@ export async function createCheckoutSession(cartItems: any[]) {
 
   // 5. Create Stripe Checkout Session
   try {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
+
     const line_items = verifiedItems.map((item) => ({
       price_data: {
         currency: 'usd',
         product_data: {
           name: item.name,
-          images: item.image ? [item.image] : [],
+          // Only pass images that are absolute HTTPS URLs — Stripe rejects anything else
+          images: item.image?.startsWith('https://') ? [item.image] : [],
         },
-        unit_amount: Math.round(item.verifiedPrice * 100),
+        unit_amount: Math.max(Math.round(item.verifiedPrice * 100), 50),
       },
       quantity: item.quantity,
     }));
@@ -99,7 +98,6 @@ export async function createCheckoutSession(cartItems: any[]) {
       payment_method_types: ['card'],
       line_items,
       mode: 'payment',
-      // Send the user to the success page with the orderId for immediate verification
       success_url: `${appUrl}/checkout/success?orderId=${orderId}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/cart`,
       metadata: {
@@ -108,13 +106,10 @@ export async function createCheckoutSession(cartItems: any[]) {
       },
     });
 
-    console.log(`Stripe session created for Order #${orderId}`);
-
     return { url: stripeSession.url };
-  } catch (error) {
-    console.error('Stripe error:', error);
-    // Cleanup the pending order if session creation fails
+  } catch (error: any) {
+    console.error('Stripe error:', error?.message || error);
     await db.delete(orders).where(eq(orders.id, orderId));
-    throw new Error('Failed to create checkout session');
+    throw new Error(`Stripe: ${error?.message || 'Failed to create checkout session'}`);
   }
 }
