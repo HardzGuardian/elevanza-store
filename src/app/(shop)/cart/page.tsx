@@ -2,6 +2,8 @@
 
 import { useCart } from '@/features/cart/store';
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Minus, Plus, Trash2, ArrowRight, ShoppingBag, Loader2, Gift } from 'lucide-react';
@@ -11,6 +13,8 @@ import { calculateBestPrice, formatPrice } from '@/features/shop/services/pricin
 import { Container } from '@/components/layout/Container';
 
 export default function CartPage() {
+  const { data: session } = useSession();
+  const router = useRouter();
   const { items, removeItem, updateQuantity, totalItems, clearCart } = useCart();
   const [loading, setLoading]           = useState(false);
   const [festivalDiscount, setFestivalDiscount] = useState(0);
@@ -32,16 +36,26 @@ export default function CartPage() {
   const total    = subtotal + shipping + tax;
 
   const handleCheckout = async () => {
+    if (!session?.user) {
+      router.push('/login?redirect=/cart');
+      return;
+    }
     try {
       setLoading(true);
       const result = await createCheckoutSession(items);
       if (result.url) {
         window.location.href = result.url;
       } else {
-        toast.error('Failed to start checkout');
+        toast.error('Failed to start checkout. Please try again.');
       }
-    } catch {
-      toast.error('Failed to initiate checkout. Please ensure you are logged in.');
+    } catch (error: any) {
+      const msg = error?.message || '';
+      if (msg.includes('Authentication')) {
+        router.push('/login?redirect=/cart');
+      } else {
+        toast.error('Checkout failed. Please try again.');
+        console.error('Checkout error:', msg);
+      }
     } finally {
       setLoading(false);
     }
