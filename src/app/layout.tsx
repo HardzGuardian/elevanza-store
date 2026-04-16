@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
@@ -7,7 +9,6 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Toaster } from "react-hot-toast";
 import { SupabaseRealtimeProvider } from "@/core/realtime/SupabaseRealtimeProvider";
-import { AdminRealtimeListener } from '@/features/admin/components/AdminRealtimeListener';
 import { cn } from "@/core/utils";
 import { EmergencyBanner } from "@/components/layout/EmergencyBanner";
 import { FestivalBanner } from "@/components/layout/FestivalBanner";
