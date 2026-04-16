@@ -99,12 +99,12 @@ export function Navbar({ storeName = 'Elevanza Moderne', categories = [] }: Navb
         )}
       >
         <Container>
-          <div className="grid grid-cols-3 items-center h-16 lg:h-[68px]">
+          <div className="flex items-center h-16 lg:h-[68px] lg:grid lg:grid-cols-3">
 
             {/* Brand — left */}
-            <div className="flex items-center">
-              <Link href="/" className="flex-shrink-0 group">
-                <span className="text-[13px] font-bold tracking-[0.18em] text-neutral-900 uppercase group-hover:opacity-60 transition-opacity duration-200">
+            <div className="flex items-center flex-1 lg:flex-none min-w-0 mr-3">
+              <Link href="/" className="group min-w-0">
+                <span className="block text-[11px] sm:text-[13px] font-bold tracking-[0.12em] sm:tracking-[0.18em] text-neutral-900 uppercase group-hover:opacity-60 transition-opacity duration-200 truncate">
                   {storeName}
                 </span>
               </Link>
@@ -129,7 +129,7 @@ export function Navbar({ storeName = 'Elevanza Moderne', categories = [] }: Navb
             </nav>
 
             {/* Actions — right */}
-            <div className="flex items-center gap-0.5 justify-end">
+            <div className="flex items-center gap-0.5 justify-end flex-shrink-0">
 
               {/* Search */}
               <button
@@ -154,16 +154,18 @@ export function Navbar({ storeName = 'Elevanza Moderne', categories = [] }: Navb
 
               {isMounted && (
                 <>
-                  <div className="hidden sm:block w-px h-4 bg-neutral-200 mx-1.5" />
-                  {session ? (
-                    <UserMenu session={session} />
-                  ) : (
-                    <Link href="/login" className="hidden sm:block">
-                      <span className="ml-1 inline-flex items-center px-4 py-1.5 text-[11px] font-semibold tracking-[0.1em] uppercase text-neutral-700 border border-neutral-300 rounded-lg hover:bg-neutral-900 hover:text-white hover:border-neutral-900 transition-all duration-200 cursor-pointer">
-                        Sign In
-                      </span>
-                    </Link>
-                  )}
+                  <div className="hidden lg:block w-px h-4 bg-neutral-200 mx-1.5" />
+                  <div className="hidden lg:block">
+                    {session ? (
+                      <UserMenu session={session} />
+                    ) : (
+                      <Link href="/login">
+                        <span className="ml-1 inline-flex items-center px-4 py-1.5 text-[11px] font-semibold tracking-[0.1em] uppercase text-neutral-700 border border-neutral-300 rounded-lg hover:bg-neutral-900 hover:text-white hover:border-neutral-900 transition-all duration-200 cursor-pointer">
+                          Sign In
+                        </span>
+                      </Link>
+                    )}
+                  </div>
                 </>
               )}
 
