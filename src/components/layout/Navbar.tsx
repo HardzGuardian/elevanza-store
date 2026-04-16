@@ -4,7 +4,7 @@ import { useDeferredValue, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { usePathname, useRouter } from 'next/navigation';
-import { ShoppingCart, Menu, X, LogOut, ChevronDown, Search, ArrowUpRight } from 'lucide-react';
+import { ShoppingCart, Menu, X, LogOut, ChevronDown, Search, ArrowUpRight, Heart } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 import {
   DropdownMenu,
@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useCart } from '@/features/cart/store';
+import { useWishlistStore } from '@/features/wishlist/store';
 import { searchProducts } from '@/features/admin/actions/product';
 import { cn } from '@/core/utils';
 import { Container } from '@/components/layout/Container';
@@ -37,6 +38,7 @@ export function Navbar({ storeName = 'Elevanza Moderne', categories = [] }: Navb
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const itemCount = totalItems();
+  const wishlistCount = useWishlistStore(s => s.ids.length);
   const deferredQuery = useDeferredValue(searchQuery.trim());
 
   useEffect(() => {
@@ -139,6 +141,20 @@ export function Navbar({ storeName = 'Elevanza Moderne', categories = [] }: Navb
               >
                 <Search className="w-[17px] h-[17px]" />
               </button>
+
+              {/* Wishlist */}
+              {isMounted && (
+                <Link href="/wishlist" aria-label="Wishlist">
+                  <span className="relative flex p-2.5 rounded-lg text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-colors">
+                    <Heart className="w-[17px] h-[17px]" />
+                    {wishlistCount > 0 && (
+                      <span className="absolute top-1.5 right-1.5 bg-red-500 text-white text-[8px] font-bold rounded-full w-3.5 h-3.5 flex items-center justify-center leading-none">
+                        {wishlistCount > 9 ? '9+' : wishlistCount}
+                      </span>
+                    )}
+                  </span>
+                </Link>
+              )}
 
               {/* Cart */}
               <Link href="/cart" aria-label="Cart">
@@ -380,8 +396,21 @@ function MobileDrawer({ navItems, session, onClose }: any) {
           ))}
         </nav>
 
+        {/* Wishlist link */}
+        <Link
+          href="/wishlist"
+          onClick={onClose}
+          className="flex items-center justify-between py-4 border-b border-neutral-100 group"
+        >
+          <span className="text-lg font-medium text-neutral-900 group-hover:opacity-50 transition-opacity flex items-center gap-2">
+            <Heart className="w-4 h-4 text-red-400" />
+            Wishlist
+          </span>
+          <ArrowUpRight className="w-4 h-4 text-neutral-300 group-hover:text-neutral-600 transition-colors" />
+        </Link>
+
         {/* Auth section */}
-        <div className="space-y-3">
+        <div className="space-y-3 mt-2">
           {session ? (
             <>
               <Link href="/account" onClick={onClose} className="flex items-center gap-3 p-4 bg-neutral-50 rounded-xl">
