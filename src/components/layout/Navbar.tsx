@@ -306,6 +306,13 @@ function SearchOverlay({ inputRef, query, results, onChange, onSubmit, onClose }
 
 /* ── User Dropdown ───────────────────────────────────────────── */
 function UserMenu({ session }: any) {
+  const { clearCart } = useCart();
+
+  const handleSignOut = () => {
+    clearCart();
+    signOut();
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -332,7 +339,7 @@ function UserMenu({ session }: any) {
         )}
         <div className="h-px bg-neutral-100 my-1 mx-1" />
         <DropdownMenuItem
-          onClick={() => signOut()}
+          onClick={handleSignOut}
           className="rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 cursor-pointer"
         >
           <LogOut className="w-4 h-4 mr-2" />
@@ -345,6 +352,14 @@ function UserMenu({ session }: any) {
 
 /* ── Mobile Drawer ───────────────────────────────────────────── */
 function MobileDrawer({ navItems, session, onClose }: any) {
+  const { clearCart } = useCart();
+
+  const handleSignOut = () => {
+    clearCart();
+    signOut();
+    onClose();
+  };
+
   return (
     <div className="lg:hidden fixed inset-0 top-16 bg-white z-40 animate-slide-from-right overflow-y-auto">
       <Container className="py-8">
@@ -379,7 +394,7 @@ function MobileDrawer({ navItems, session, onClose }: any) {
                 </div>
               </Link>
               <button
-                onClick={() => { signOut(); onClose(); }}
+                onClick={handleSignOut}
                 className="w-full py-3 text-sm font-semibold text-red-500 border border-red-100 rounded-xl hover:bg-red-50 transition-colors"
               >
                 Sign Out
