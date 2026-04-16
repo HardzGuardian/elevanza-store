@@ -2,8 +2,20 @@
 
 import { db } from "@/core/db";
 import { orders, orderItems, products } from '@/core/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, and } from 'drizzle-orm';
 import { revalidatePath } from "next/cache";
+
+// Called when user hits back/cancel on Stripe checkout page
+export async function cancelPendingOrder(orderId: number) {
+  try {
+    await db.update(orders)
+      .set({ status: 'cancelled' })
+      .where(and(eq(orders.id, orderId), eq(orders.status, 'pending')));
+    return { success: true };
+  } catch {
+    return { success: false };
+  }
+}
 
 export async function updateOrderStatus(orderId: number, status: string) {
   try {

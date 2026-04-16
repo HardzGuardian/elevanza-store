@@ -3,11 +3,12 @@
 import { useCart } from '@/features/cart/store';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Minus, Plus, Trash2, ArrowRight, ShoppingBag, Loader2, Gift } from 'lucide-react';
 import { createCheckoutSession } from '@/features/checkout/actions/checkout';
+import { cancelPendingOrder } from '@/features/checkout/actions/order';
 import { toast } from 'react-hot-toast';
 import { calculateBestPrice, formatPrice } from '@/features/shop/services/pricing';
 import { Container } from '@/components/layout/Container';
@@ -15,10 +16,26 @@ import { Container } from '@/components/layout/Container';
 export default function CartPage() {
   const { data: session } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { items, removeItem, updateQuantity, totalItems, clearCart } = useCart();
   const [loading, setLoading]           = useState(false);
   const [festivalDiscount, setFestivalDiscount] = useState(0);
   const [festivalName, setFestivalName] = useState('');
+
+  // Handle return from cancelled Stripe checkout
+  useEffect(() => {
+    const cancelled = searchParams.get('cancelled');
+    const orderId   = searchParams.get('orderId');
+    if (cancelled === 'true' && orderId) {
+      cancelPendingOrder(Number(orderId));
+      toast('Payment cancelled. Your cart is still saved.', { icon: '↩️' });
+      // Clean up URL params without re-render
+      const url = new URL(window.location.href);
+      url.searchParams.delete('cancelled');
+      url.searchParams.delete('orderId');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetch('/api/active-festival')

@@ -5,9 +5,10 @@ import { eq } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import { CheckCircle2, Package, ArrowRight, ShoppingBag } from 'lucide-react';
 import { Container } from '@/components/layout/Container';
+import { CartClearer } from '@/features/checkout/components/CartClearer';
 
 interface SuccessPageProps {
-  searchParams: Promise<{ orderId?: string }>;
+  searchParams: Promise<{ orderId?: string; session_id?: string }>;
 }
 
 export default async function SuccessPage({ searchParams }: SuccessPageProps) {
@@ -17,6 +18,13 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
 
   const [order] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
   if (!order) notFound();
+
+  // Stripe redirects here only after a successful payment.
+  // Mark as completed if still pending (fallback in case webhook is delayed/misconfigured).
+  if (order.status === 'pending' && params.session_id) {
+    await db.update(orders).set({ status: 'completed' }).where(eq(orders.id, orderId));
+    order.status = 'completed';
+  }
 
   const items = await db
     .select({
@@ -33,6 +41,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
 
   return (
     <div className="bg-white min-h-screen">
+      <CartClearer />
       <Container className="py-16 md:py-24">
         <div className="max-w-lg mx-auto">
 

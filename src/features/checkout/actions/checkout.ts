@@ -99,7 +99,7 @@ export async function createCheckoutSession(cartItems: any[]) {
       line_items,
       mode: 'payment',
       success_url: `${appUrl}/checkout/success?orderId=${orderId}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${appUrl}/cart`,
+      cancel_url: `${appUrl}/cart?cancelled=true&orderId=${orderId}`,
       metadata: {
         userId: String(userId),
         orderId: String(orderId),
