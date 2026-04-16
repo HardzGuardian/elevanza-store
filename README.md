@@ -1,70 +1,24 @@
-# Elevanza Store
+# Elevanza Store - Project Summary
 
-A modern e-commerce platform for fashion retail built with Next.js 15, TypeScript, and Tailwind CSS.
+**Elevanza Store** is a full-stack fashion e-commerce platform built with Next.js 15, created by Sagar Salunkhe to practice modern web development and real-world production patterns.
 
-## Tech Stack
+## Core Features
+The project delivers a complete shopping experience built around a clean neutral aesthetic. Customers can browse a product catalog with category filtering, manage a persistent cart, and complete purchases through a Stripe-powered checkout. Orders are tracked from placement through fulfillment, with stock automatically reduced on payment confirmation via webhooks.
 
-- **Framework** — Next.js 15 (App Router)
-- **Language** — TypeScript
-- **Styling** — Tailwind CSS v4
-- **Database** — PostgreSQL (Supabase)
-- **ORM** — Drizzle ORM
-- **Auth** — NextAuth.js
-- **Payments** — Stripe
-- **Image Hosting** — Cloudinary
-- **Deployment** — Vercel
+## Technical Architecture
+The application is structured around Next.js 15 App Router with a clear separation of concerns:
+- **Server Actions** handle all mutations — checkout, product management, settings, CMS pages — keeping API logic colocated with features
+- **Drizzle ORM** over PostgreSQL (Supabase) for type-safe database queries with schema-driven migrations
+- **NextAuth.js** for session management with role-based access separating storefront users from admin
+- **Cloudinary** for image hosting with an `OptimizedImage` wrapper that handles fallback states and format/quality optimization automatically
 
-## Features
+## Notable Systems
+The admin dashboard provides full store control from a single settings form — banner image, color theme, footer links, featured homepage segments, and visibility toggles for each storefront section. A festival/sale mode applies site-wide discounts with a single toggle, overriding individual product pricing through a unified price calculation service. CMS pages allow custom content to be authored and published independently of the product catalog.
 
-- Full storefront with product catalog, filters, and search
-- Shopping cart with persistent state
-- Stripe checkout with webhook-based order fulfillment
-- Admin dashboard — products, orders, customers, CMS pages
-- Store settings — banner, design, layout, footer configuration
-- Festival/sale mode with site-wide discount
-- Cloudinary image uploads
-- Real-time order notifications
+The checkout flow performs server-side price verification before creating a Stripe session, preventing client-side price manipulation. A pending order is created before the user reaches Stripe, then confirmed and fulfilled through a webhook after successful payment.
 
-## Getting Started
+## Development Philosophy
+The codebase uses a consistent neutral design system throughout — no framework color presets, every component using the same `neutral-` palette. Features are organized by domain under `src/features/` rather than by file type, keeping related actions, components, and services colocated. Revalidation is handled through tagged cache invalidation via `revalidateTag` and `revalidatePath` to keep data fresh without full page reloads.
 
-```bash
-npm install
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) to view the storefront.  
-Admin panel is at [http://localhost:3000/admin](http://localhost:3000/admin).
-
-## Environment Variables
-
-Create a `.env.local` file in the root with the following:
-
-```env
-DATABASE_URL=
-
-NEXTAUTH_SECRET=
-AUTH_SECRET=
-
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
-
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-```
-
-## Database
-
-This project uses Drizzle ORM with PostgreSQL.
-
-```bash
-# Push schema to database
-npm run db:push
-```
-
-## License
-
-MIT © [Sagar Salunkhe](https://github.com/HardzGuardian)
+## Future Roadmap
+Planned additions include a wishlist system, product reviews, order tracking emails via Resend, and an analytics dashboard for the admin panel.
