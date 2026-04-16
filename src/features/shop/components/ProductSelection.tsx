@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useCart } from '@/features/cart/store';
+import { useWishlist } from '@/features/wishlist/store';
 import { ShoppingBag, Heart, Share2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { cn } from '@/core/utils';
@@ -20,6 +21,8 @@ interface ProductSelectionProps {
 export function ProductSelection({ product }: ProductSelectionProps) {
   const [selectedSize, setSelectedSize] = useState('');
   const { addItem } = useCart();
+  const { toggle, isWishlisted } = useWishlist();
+  const wishlisted = isWishlisted(product.id);
 
   const sizes = product.sizes ? product.sizes.split(',').map(s => s.trim()).filter(Boolean) : [];
   const hasSizes = sizes.length > 0;
@@ -85,10 +88,25 @@ export function ProductSelection({ product }: ProductSelectionProps) {
           Add to Bag
         </button>
         <button
-          className="w-12 h-12 border border-neutral-200 rounded-xl flex items-center justify-center text-neutral-500 hover:border-red-200 hover:text-red-500 hover:bg-red-50 transition-colors"
-          aria-label="Save to wishlist"
+          className={`w-12 h-12 border rounded-xl flex items-center justify-center transition-colors ${
+            wishlisted
+              ? 'border-red-200 bg-red-50 text-red-500'
+              : 'border-neutral-200 text-neutral-500 hover:border-red-200 hover:text-red-500 hover:bg-red-50'
+          }`}
+          aria-label={wishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
+          onClick={() => {
+            toggle(product.id);
+            toast(wishlisted ? 'Removed from wishlist' : 'Saved to wishlist', {
+              icon: wishlisted ? '🤍' : '❤️',
+            });
+          }}
         >
-          <Heart className="w-4 h-4" strokeWidth={1.5} />
+          <Heart
+            className="w-4 h-4 transition-all"
+            fill={wishlisted ? '#ef4444' : 'none'}
+            stroke={wishlisted ? '#ef4444' : 'currentColor'}
+            strokeWidth={1.5}
+          />
         </button>
         <button
           className="w-12 h-12 border border-neutral-200 rounded-xl flex items-center justify-center text-neutral-500 hover:border-neutral-400 hover:text-neutral-700 transition-colors"
