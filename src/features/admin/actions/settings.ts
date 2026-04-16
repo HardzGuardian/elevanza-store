@@ -117,9 +117,9 @@ export async function saveSettings(data: any) {
     // Revalidate relevant cache paths and tags
     revalidatePath("/admin/settings");
     revalidatePath("/");
-    revalidateTag(STOREFRONT_TAGS.settings);
-    revalidateTag(STOREFRONT_TAGS.contentPages);
-    revalidateTag('storefront-shell');
+    revalidateTag(STOREFRONT_TAGS.settings, {});
+    revalidateTag(STOREFRONT_TAGS.contentPages, {});
+    revalidateTag('storefront-shell', {});
 
     return { success: true };
   } catch (error) {

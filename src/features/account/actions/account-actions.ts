@@ -41,7 +41,7 @@ export async function updateAccountSettings(data: z.infer<typeof accountSchema>)
   } catch (error) {
     console.error("Failed to update account:", error);
     if (error instanceof z.ZodError) {
-      return { success: false, error: error.errors[0].message };
+      return { success: false, error: error.issues[0].message };
     }
     return { success: false, error: "Something went wrong" };
   }

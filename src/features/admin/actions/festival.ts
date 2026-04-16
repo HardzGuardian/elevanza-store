@@ -23,7 +23,7 @@ export async function createFestival(data: any) {
     });
 
     revalidatePath("/admin/festivals");
-    revalidateTag(STOREFRONT_TAGS.festivals);
+    revalidateTag(STOREFRONT_TAGS.festivals, {});
     return { success: true };
   } catch (error) {
     console.error("Failed to create festival:", error);
@@ -44,7 +44,7 @@ export async function updateFestival(id: number, data: any) {
 
     revalidatePath("/admin/festivals");
     revalidatePath("/");
-    revalidateTag(STOREFRONT_TAGS.festivals);
+    revalidateTag(STOREFRONT_TAGS.festivals, {});
     return { success: true };
   } catch (error) {
     console.error("Failed to update festival:", error);
@@ -63,7 +63,7 @@ export async function toggleFestival(id: number, active: boolean) {
 
     revalidatePath("/admin/festivals");
     revalidatePath("/");
-    revalidateTag(STOREFRONT_TAGS.festivals);
+    revalidateTag(STOREFRONT_TAGS.festivals, {});
     return { success: true };
   } catch (error) {
     console.error("Failed to toggle festival:", error);
@@ -75,7 +75,7 @@ export async function deleteFestival(id: number) {
   try {
     await db.delete(festivals).where(eq(festivals.id, id));
     revalidatePath("/admin/festivals");
-    revalidateTag(STOREFRONT_TAGS.festivals);
+    revalidateTag(STOREFRONT_TAGS.festivals, {});
     return { success: true };
   } catch (error) {
     console.error("Failed to delete festival:", error);

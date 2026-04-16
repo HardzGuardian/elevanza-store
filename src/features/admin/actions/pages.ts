@@ -55,7 +55,7 @@ export async function createPage(slug: string, title: string, content: string = 
     });
 
     revalidatePath('/admin/pages');
-    revalidateTag(STOREFRONT_TAGS.contentPages);
+    revalidateTag(STOREFRONT_TAGS.contentPages, {});
     return { success: true };
   } catch (error: any) {
     console.error('Error creating page:', error);
@@ -77,7 +77,7 @@ export async function updatePage(slug: string, title: string, content: string, f
     
     revalidatePath(`/pages/${slug}`);
     revalidatePath('/admin/pages');
-    revalidateTag(STOREFRONT_TAGS.contentPages);
+    revalidateTag(STOREFRONT_TAGS.contentPages, {});
     return { success: true };
   } catch (error) {
     console.error(`Error updating page ${slug}:`, error);
@@ -90,7 +90,7 @@ export async function deletePage(slug: string) {
     await assertAdmin();
     await db.delete(contentPages).where(eq(contentPages.slug, slug));
     revalidatePath('/admin/pages');
-    revalidateTag(STOREFRONT_TAGS.contentPages);
+    revalidateTag(STOREFRONT_TAGS.contentPages, {});
     return { success: true };
   } catch (error) {
     console.error(`Error deleting page ${slug}:`, error);
@@ -110,7 +110,7 @@ export async function togglePageVisibility(slug: string, isVisible: boolean) {
 
     revalidatePath(`/pages/${slug}`);
     revalidatePath('/admin/pages');
-    revalidateTag(STOREFRONT_TAGS.contentPages);
+    revalidateTag(STOREFRONT_TAGS.contentPages, {});
     return { success: true };
   } catch (error) {
     console.error(`Error updating page visibility for ${slug}:`, error);

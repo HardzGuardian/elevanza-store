@@ -23,7 +23,7 @@ export async function createProduct(data: any) {
 
     revalidatePath("/admin/products");
     revalidatePath("/products");
-    revalidateTag(STOREFRONT_TAGS.products);
+    revalidateTag(STOREFRONT_TAGS.products, {});
     return { success: true };
   } catch (error) {
     console.error("Failed to create product:", error);
@@ -49,7 +49,7 @@ export async function updateProduct(id: number, data: any) {
     revalidatePath("/admin/products");
     revalidatePath("/products");
     revalidatePath(`/products/${id}`);
-    revalidateTag(STOREFRONT_TAGS.products);
+    revalidateTag(STOREFRONT_TAGS.products, {});
     return { success: true };
   } catch (error) {
     console.error("Failed to update product:", error);
@@ -62,7 +62,7 @@ export async function deleteProduct(id: number) {
     await db.delete(products).where(eq(products.id, id));
     revalidatePath("/admin/products");
     revalidatePath("/products");
-    revalidateTag(STOREFRONT_TAGS.products);
+    revalidateTag(STOREFRONT_TAGS.products, {});
     return { success: true };
   } catch (error) {
     console.error("Failed to delete product:", error);

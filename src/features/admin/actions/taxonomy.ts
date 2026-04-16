@@ -16,7 +16,7 @@ export async function createCategory(data: { name: string; slug: string; image?:
     await db.insert(categories).values(data);
     revalidatePath("/admin/taxonomy");
     revalidatePath("/products");
-    revalidateTag(STOREFRONT_TAGS.categories);
+    revalidateTag(STOREFRONT_TAGS.categories, {});
     return { success: true };
   } catch (error) {
     console.error("Failed to create category:", error);
@@ -29,7 +29,7 @@ export async function deleteCategory(id: number) {
     await db.delete(categories).where(eq(categories.id, id));
     revalidatePath("/admin/taxonomy");
     revalidatePath("/products");
-    revalidateTag(STOREFRONT_TAGS.categories);
+    revalidateTag(STOREFRONT_TAGS.categories, {});
     return { success: true };
   } catch (error) {
     console.error("Failed to delete category:", error);
@@ -47,7 +47,7 @@ export async function createFestival(data: any) {
     await db.insert(festivals).values(data);
     revalidatePath("/admin/taxonomy");
     revalidatePath("/");
-    revalidateTag(STOREFRONT_TAGS.festivals);
+    revalidateTag(STOREFRONT_TAGS.festivals, {});
     return { success: true };
   } catch (error) {
     console.error("Failed to create festival:", error);
@@ -60,7 +60,7 @@ export async function updateFestival(id: number, data: any) {
     await db.update(festivals).set(data).where(eq(festivals.id, id));
     revalidatePath("/admin/taxonomy");
     revalidatePath("/");
-    revalidateTag(STOREFRONT_TAGS.festivals);
+    revalidateTag(STOREFRONT_TAGS.festivals, {});
     return { success: true };
   } catch (error) {
     console.error("Failed to update festival:", error);
@@ -73,7 +73,7 @@ export async function deleteFestival(id: number) {
     await db.delete(festivals).where(eq(festivals.id, id));
     revalidatePath("/admin/taxonomy");
     revalidatePath("/");
-    revalidateTag(STOREFRONT_TAGS.festivals);
+    revalidateTag(STOREFRONT_TAGS.festivals, {});
     return { success: true };
   } catch (error) {
     console.error("Failed to delete festival:", error);
@@ -91,7 +91,7 @@ export async function toggleFestival(id: number, active: boolean) {
     revalidatePath("/admin/taxonomy");
     revalidatePath("/");
     revalidatePath("/(shop)", "layout");
-    revalidateTag(STOREFRONT_TAGS.festivals);
+    revalidateTag(STOREFRONT_TAGS.festivals, {});
     return { success: true };
   } catch (error) {
     console.error("Failed to toggle festival:", error);

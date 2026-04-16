@@ -65,9 +65,9 @@ export async function createCheckoutSession(cartItems: any[]) {
     userId,
     totalAmount: totalAmount.toFixed(2),
     status: 'pending',
-  });
+  }).returning({ id: orders.id });
 
-  const orderId = newOrder.insertId;
+  const orderId = newOrder.id;
 
   // Insert line items
   for (const item of verifiedItems) {
