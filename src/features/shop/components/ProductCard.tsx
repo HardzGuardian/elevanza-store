@@ -121,31 +121,31 @@ export function ProductCard({
       </Link>
 
       {/* ── Info ─────────────────────────────────────── */}
-      <div className="mt-3.5 space-y-1">
-        <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
+      <div className="mt-2.5 sm:mt-3.5 space-y-0.5 sm:space-y-1">
+        <p className="text-[8px] sm:text-[9px] font-semibold uppercase tracking-[0.15em] text-neutral-400">
           {product.category}
         </p>
 
         <Link href={`/products/${product.id}`} className="block">
-          <h3 className="text-sm font-semibold text-neutral-900 leading-snug hover:opacity-50 transition-opacity line-clamp-1">
+          <h3 className="text-xs sm:text-sm font-semibold text-neutral-900 leading-snug hover:opacity-50 transition-opacity line-clamp-1">
             {product.name}
           </h3>
         </Link>
 
         {showSizeBadge && sizesList.length > 0 && (
-          <p className="text-[10px] text-neutral-400 font-medium">
+          <p className="hidden sm:block text-[10px] text-neutral-400 font-medium">
             {sizesList.length === 1
               ? sizesList[0]
               : `${sizesList.length} sizes available`}
           </p>
         )}
 
-        <div className="flex items-baseline gap-2 pt-0.5">
-          <span className="text-[13px] font-bold text-neutral-900">
+        <div className="flex items-baseline gap-1.5 pt-0.5">
+          <span className="text-xs sm:text-[13px] font-bold text-neutral-900">
             {formatPrice(pricing.finalPrice)}
           </span>
           {hasDiscount && (
-            <span className="text-xs text-neutral-400 line-through">
+            <span className="text-[10px] sm:text-xs text-neutral-400 line-through">
               {formatPrice(pricing.originalPrice)}
             </span>
           )}
