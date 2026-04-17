@@ -92,13 +92,13 @@ export function ProductCard({
           )}
         </div>
 
-        {/* Wishlist */}
+        {/* Wishlist — desktop hover only, hidden on mobile */}
         <button
           aria-label={wishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
-          className={`absolute top-3 right-3 z-10 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center transition-all duration-200 hover:bg-white hover:scale-110 shadow-sm ${
+          className={`hidden sm:flex absolute top-3 right-3 z-10 w-7 h-7 rounded-full bg-white/90 items-center justify-center transition-all duration-200 hover:bg-white hover:scale-110 shadow-sm ${
             wishlisted
               ? 'opacity-100 translate-y-0'
-              : 'opacity-100 sm:opacity-0 translate-y-0 sm:translate-y-1 sm:group-hover:opacity-100 sm:group-hover:translate-y-0'
+              : 'opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0'
           }`}
           onClick={handleWishlist}
         >
