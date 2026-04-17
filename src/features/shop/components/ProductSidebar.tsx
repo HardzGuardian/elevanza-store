@@ -1,8 +1,8 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useState } from 'react';
-import { Filter, Trash2, ChevronDown } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { Filter, Trash2, ChevronDown, X, SlidersHorizontal } from 'lucide-react';
 import { cn } from '@/core/utils';
 
 interface ProductSidebarProps {
@@ -13,6 +13,7 @@ interface ProductSidebarProps {
 export function ProductSidebar({ categories, availableSizes = [] }: ProductSidebarProps) {
   const router       = useRouter();
   const searchParams = useSearchParams();
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const currentCategory = searchParams.get('category') || 'all';
   const minPrice        = searchParams.get('minPrice') || '';
@@ -24,8 +25,19 @@ export function ProductSidebar({ categories, availableSizes = [] }: ProductSideb
 
   const [priceRange, setPriceRange] = useState({ min: minPrice, max: maxPrice });
 
-  const hasActiveFilters =
-    currentCategory !== 'all' || minPrice || maxPrice || currentSize || isSale || inStock || sort !== 'newest';
+  // Close sheet on route change
+  useEffect(() => { setSheetOpen(false); }, [searchParams]);
+
+  const activeFilterCount = [
+    currentCategory !== 'all',
+    minPrice || maxPrice,
+    currentSize,
+    isSale,
+    inStock,
+    sort !== 'newest',
+  ].filter(Boolean).length;
+
+  const hasActiveFilters = activeFilterCount > 0;
 
   const buildQuery = useCallback(
     (params: Record<string, string | null>) => {
@@ -42,25 +54,10 @@ export function ProductSidebar({ categories, availableSizes = [] }: ProductSideb
   const go = (params: Record<string, string | null>) =>
     router.push(`/products?${buildQuery(params)}`);
 
-  return (
-    <aside className="w-full lg:w-64 flex-shrink-0 space-y-8 lg:sticky lg:top-24 h-fit">
+  const clearAll = () => { router.push('/products'); setPriceRange({ min: '', max: '' }); };
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-neutral-900">
-          <Filter className="w-4 h-4" strokeWidth={1.5} />
-          <h2 className="text-sm font-bold">Filters</h2>
-        </div>
-        {hasActiveFilters && (
-          <button
-            onClick={() => { router.push('/products'); setPriceRange({ min: '', max: '' }); }}
-            className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-red-500 hover:text-red-600 transition-colors"
-          >
-            <Trash2 className="w-3 h-3" /> Clear
-          </button>
-        )}
-      </div>
-
+  const filterContent = (
+    <div className="space-y-8">
       {/* Sort */}
       <FilterSection title="Sort By">
         <div className="relative">
@@ -167,9 +164,7 @@ export function ProductSidebar({ categories, availableSizes = [] }: ProductSideb
             >
               {inStock && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
             </div>
-            <span className="text-sm font-medium text-neutral-700 group-hover:text-neutral-900 transition-colors">
-              In Stock Only
-            </span>
+            <span className="text-sm font-medium text-neutral-700 group-hover:text-neutral-900 transition-colors">In Stock Only</span>
           </label>
           <label className="flex items-center gap-3 cursor-pointer group">
             <div
@@ -181,18 +176,107 @@ export function ProductSidebar({ categories, availableSizes = [] }: ProductSideb
             >
               {isSale && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
             </div>
-            <span className="text-sm font-medium text-neutral-700 group-hover:text-neutral-900 transition-colors">
-              On Sale
-            </span>
-            {isSale && (
-              <span className="ml-auto px-1.5 py-0.5 bg-red-50 text-red-500 text-[9px] font-bold uppercase tracking-wider rounded">
-                Active
-              </span>
-            )}
+            <span className="text-sm font-medium text-neutral-700 group-hover:text-neutral-900 transition-colors">On Sale</span>
           </label>
         </div>
       </FilterSection>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* ── Desktop sidebar (lg+) ─────────────────────────── */}
+      <aside className="hidden lg:block w-64 flex-shrink-0 sticky top-24 h-fit space-y-8">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-neutral-900">
+            <Filter className="w-4 h-4" strokeWidth={1.5} />
+            <h2 className="text-sm font-bold">Filters</h2>
+          </div>
+          {hasActiveFilters && (
+            <button onClick={clearAll} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-red-500 hover:text-red-600 transition-colors">
+              <Trash2 className="w-3 h-3" /> Clear
+            </button>
+          )}
+        </div>
+        {filterContent}
+      </aside>
+
+      {/* ── Mobile filter bar (< lg) ──────────────────────── */}
+      <div className="lg:hidden flex items-center gap-2 mb-6">
+        <button
+          onClick={() => setSheetOpen(true)}
+          className="flex items-center gap-2 px-4 py-2.5 border border-neutral-200 rounded-xl text-sm font-semibold text-neutral-700 hover:border-neutral-900 hover:text-neutral-900 transition-colors"
+        >
+          <SlidersHorizontal className="w-4 h-4" />
+          Filters
+          {activeFilterCount > 0 && (
+            <span className="w-5 h-5 bg-neutral-900 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
+
+        {/* Active sort pill */}
+        {sort !== 'newest' && (
+          <span className="px-3 py-2 bg-neutral-100 rounded-xl text-xs font-semibold text-neutral-700">
+            {sort === 'price-low' ? 'Price ↑' : 'Price ↓'}
+          </span>
+        )}
+
+        {hasActiveFilters && (
+          <button onClick={clearAll} className="ml-auto text-xs font-semibold text-red-500 hover:text-red-600 transition-colors flex items-center gap-1">
+            <Trash2 className="w-3 h-3" /> Clear
+          </button>
+        )}
+      </div>
+
+      {/* ── Mobile bottom sheet ───────────────────────────── */}
+      {sheetOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="lg:hidden fixed inset-0 bg-black/40 z-40 animate-fade-in"
+            onClick={() => setSheetOpen(false)}
+          />
+          {/* Sheet */}
+          <div className="lg:hidden fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl shadow-2xl max-h-[85vh] flex flex-col animate-slide-from-bottom">
+            {/* Sheet header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-100 flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4 text-neutral-600" strokeWidth={1.5} />
+                <span className="text-sm font-bold text-neutral-900">Filters</span>
+                {activeFilterCount > 0 && (
+                  <span className="px-2 py-0.5 bg-neutral-900 text-white text-[10px] font-bold rounded-full">
+                    {activeFilterCount} active
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={() => setSheetOpen(false)}
+                className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-500 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Scrollable content */}
+            <div className="overflow-y-auto flex-1 px-5 py-6">
+              {filterContent}
+            </div>
+
+            {/* Sheet footer */}
+            <div className="px-5 py-4 border-t border-neutral-100 flex-shrink-0">
+              <button
+                onClick={() => setSheetOpen(false)}
+                className="w-full h-12 bg-neutral-900 hover:bg-black text-white text-sm font-semibold rounded-xl transition-colors"
+              >
+                Show Results
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 }
 
