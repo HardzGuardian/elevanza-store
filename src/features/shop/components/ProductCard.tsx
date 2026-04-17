@@ -96,7 +96,9 @@ export function ProductCard({
         <button
           aria-label={wishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
           className={`absolute top-3 right-3 z-10 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center transition-all duration-200 hover:bg-white hover:scale-110 shadow-sm ${
-            wishlisted ? 'opacity-100 translate-y-0' : 'opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0'
+            wishlisted
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-100 sm:opacity-0 translate-y-0 sm:translate-y-1 sm:group-hover:opacity-100 sm:group-hover:translate-y-0'
           }`}
           onClick={handleWishlist}
         >
@@ -108,8 +110,8 @@ export function ProductCard({
           />
         </button>
 
-        {/* Quick-add bar */}
-        <div className="absolute inset-x-3 bottom-3 z-10 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-200">
+        {/* Quick-add bar — always visible on mobile, hover-only on desktop */}
+        <div className="absolute inset-x-3 bottom-3 z-10 translate-y-0 opacity-100 sm:translate-y-2 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 transition-all duration-200">
           <button
             onClick={handleAddToCart}
             className="w-full py-2.5 bg-neutral-900/95 hover:bg-black text-white text-[11px] font-semibold uppercase tracking-[0.1em] rounded-lg flex items-center justify-center gap-1.5 transition-colors"
