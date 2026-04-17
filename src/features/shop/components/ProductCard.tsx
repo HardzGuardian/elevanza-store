@@ -31,7 +31,7 @@ export function ProductCard({
     e.preventDefault();
     e.stopPropagation();
     await toggle(product.id);
-    toast(wishlisted ? 'Removed from wishlist' : 'Saved to wishlist', { icon: wishlisted ? '🤍' : '❤️' });
+    wishlisted ? toast('Removed from wishlist') : toast.success('Saved to wishlist');
   };
 
   const pricing = calculateBestPrice(

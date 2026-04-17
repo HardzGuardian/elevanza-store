@@ -96,9 +96,7 @@ export function ProductSelection({ product }: ProductSelectionProps) {
           aria-label={wishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
           onClick={async () => {
             await toggle(product.id);
-            toast(wishlisted ? 'Removed from wishlist' : 'Saved to wishlist', {
-              icon: wishlisted ? '🤍' : '❤️',
-            });
+            wishlisted ? toast('Removed from wishlist') : toast.success('Saved to wishlist');
           }}
         >
           <Heart

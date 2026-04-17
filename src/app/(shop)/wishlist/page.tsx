@@ -38,7 +38,7 @@ export default function WishlistPage() {
 
   const handleRemove = async (product: Product) => {
     await toggle(product.id);
-    toast('Removed from wishlist', { icon: '🤍' });
+    toast('Removed from wishlist');
   };
 
   const handleAddToCart = (product: Product) => {
