@@ -13,7 +13,7 @@ export default async function AdminDashboard() {
       db.select({ value: count() }).from(products),
       db.select({ value: count() }).from(users),
       db.select({ value: count() }).from(orders).where(sql`${orders.status} != 'pending'`),
-      db.select({ value: sum(orders.totalAmount) }).from(orders).where(eq(orders.status, 'completed')),
+      db.select({ value: sum(orders.totalAmount) }).from(orders).where(sql`${orders.status} NOT IN ('pending', 'cancelled')`),
     ]);
   } catch (error) {
     return <DbErrorView error={error} />;

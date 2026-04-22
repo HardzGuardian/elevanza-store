@@ -35,7 +35,7 @@ export async function POST(req: Request) {
 
     try {
       await db.update(orders)
-        .set({ status: 'completed' })
+        .set({ status: 'processing' })
         .where(eq(orders.id, orderId));
 
       const items = await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));

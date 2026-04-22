@@ -11,11 +11,11 @@ import { RetryPaymentButton } from "@/features/checkout/components/RetryPaymentB
 
 // The shipping pipeline order
 const PIPELINE = [
-  { key: 'completed',        label: 'Payment Confirmed', icon: CheckCircle2 },
-  { key: 'processing',       label: 'Processing',        icon: Package       },
+  { key: 'processing',       label: 'Payment Confirmed', icon: CheckCircle2 },
   { key: 'shipped',          label: 'Shipped',           icon: Truck         },
   { key: 'out_for_delivery', label: 'Out for Delivery',  icon: MapPin        },
   { key: 'delivered',        label: 'Delivered',         icon: Home          },
+  { key: 'completed',        label: 'Completed',         icon: CheckCircle2  },
 ] as const;
 
 const PIPELINE_ORDER = PIPELINE.map(s => s.key);
@@ -29,13 +29,13 @@ type OrderStatus = 'pending' | 'completed' | 'processing' | 'shipped' | 'out_for
 function StatusBadge({ status }: { status: string | null }) {
   const s = status ?? 'pending';
   const map: Record<string, { label: string; cls: string }> = {
-    pending:          { label: 'Awaiting Payment',  cls: 'bg-amber-50 text-amber-700 border-amber-100'   },
-    completed:        { label: 'Payment Confirmed', cls: 'bg-green-50 text-green-700 border-green-100'   },
-    processing:       { label: 'Processing',        cls: 'bg-blue-50 text-blue-700 border-blue-100'     },
+    pending:          { label: 'Awaiting Payment',  cls: 'bg-amber-50 text-amber-700 border-amber-100'        },
+    processing:       { label: 'Payment Confirmed', cls: 'bg-green-50 text-green-700 border-green-100'        },
     shipped:          { label: 'Shipped',            cls: 'bg-neutral-100 text-neutral-700 border-neutral-200' },
-    out_for_delivery: { label: 'Out for Delivery',  cls: 'bg-sky-50 text-sky-700 border-sky-100'        },
+    out_for_delivery: { label: 'Out for Delivery',  cls: 'bg-sky-50 text-sky-700 border-sky-100'             },
     delivered:        { label: 'Delivered',          cls: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
-    cancelled:        { label: 'Cancelled',          cls: 'bg-red-50 text-red-600 border-red-100'        },
+    completed:        { label: 'Completed',          cls: 'bg-neutral-900 text-white border-neutral-900'      },
+    cancelled:        { label: 'Cancelled',          cls: 'bg-red-50 text-red-600 border-red-100'             },
   };
   const { label, cls } = map[s] || { label: s, cls: 'bg-neutral-50 text-neutral-500 border-neutral-100' };
   return (
@@ -46,7 +46,7 @@ function StatusBadge({ status }: { status: string | null }) {
 }
 
 function OrderTracker({ status }: { status: string | null }) {
-  if (!status || status === 'pending' || status === 'cancelled') return null;
+  if (!status || status === 'pending' || status === 'cancelled' || status === 'completed') return null;
 
   const currentIdx  = getStepIndex(status);
   const totalSteps  = PIPELINE.length - 1;

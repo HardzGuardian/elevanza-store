@@ -22,8 +22,8 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   // Stripe redirects here only after a successful payment.
   // Mark as completed if still pending (fallback in case webhook is delayed/misconfigured).
   if (order.status === 'pending' && params.session_id) {
-    await db.update(orders).set({ status: 'completed' }).where(eq(orders.id, orderId));
-    order.status = 'completed';
+    await db.update(orders).set({ status: 'processing' }).where(eq(orders.id, orderId));
+    order.status = 'processing';
   }
 
   const items = await db
