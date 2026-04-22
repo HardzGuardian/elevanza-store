@@ -1,18 +1,23 @@
-import { Resend } from 'resend';
+import { BrevoClient } from '@getbrevo/brevo';
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
-
-const FROM = process.env.RESEND_FROM_EMAIL || 'Elevanza Store <noreply@elevanza.com>';
 const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
+
+function getClient() {
+  return new BrevoClient({ apiKey: process.env.BREVO_API_KEY! });
+}
 
 export async function sendPasswordResetEmail(to: string, token: string) {
   const resetUrl = `${APP_URL}/reset-password?token=${token}`;
+  const client = getClient();
 
-  await resend.emails.send({
-    from: FROM,
-    to,
+  await client.transactionalEmails.sendTransacEmail({
+    sender: {
+      name:  process.env.BREVO_FROM_NAME  || 'Elevanza Store',
+      email: process.env.BREVO_FROM_EMAIL || 'noreply@elevanza.com',
+    },
+    to: [{ email: to }],
     subject: 'Reset your Elevanza password',
-    html: `
+    htmlContent: `
       <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#fff;">
         <h1 style="font-size:22px;font-weight:700;color:#0a0a0a;margin-bottom:8px;">Reset your password</h1>
         <p style="color:#737373;font-size:14px;margin-bottom:28px;line-height:1.6;">

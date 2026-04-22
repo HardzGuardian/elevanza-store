@@ -15,6 +15,7 @@
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.2",
     "@base-ui/react": "^1.4.0",
+    "@getbrevo/brevo": "^5.0.4",
     "@hookform/resolvers": "^5.2.2",
     "@stripe/stripe-js": "^9.1.0",
     "@supabase/supabase-js": "^2.103.2",
@@ -36,7 +37,6 @@
     "react-dom": "19.2.4",
     "react-hook-form": "^7.72.1",
     "react-hot-toast": "^2.6.0",
-    "resend": "^6.12.2",
     "shadcn": "^4.2.0",
     "stripe": "^22.0.1",
     "tailwind-merge": "^3.5.0",
