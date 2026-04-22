@@ -2,6 +2,7 @@ import { db } from '@/core/db';
 import { orders, orderItems, users } from '@/core/db/schema';
 import { eq, desc, count } from 'drizzle-orm';
 import { OrderStatusSelect } from '@/features/admin/components/OrderStatusSelect';
+import { PaymentStatusBadge } from '@/features/admin/components/PaymentStatusBadge';
 import { Package } from 'lucide-react';
 
 export default async function AdminOrdersPage() {
@@ -46,6 +47,7 @@ export default async function AdminOrdersPage() {
                 <th className="px-5 py-3.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400">Items</th>
                 <th className="px-5 py-3.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400">Date</th>
                 <th className="px-5 py-3.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400">Amount</th>
+                <th className="px-5 py-3.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400">Payment Status</th>
                 <th className="px-5 py-3.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400">Shipping Status</th>
               </tr>
             </thead>
@@ -72,6 +74,9 @@ export default async function AdminOrdersPage() {
                   </td>
                   <td className="px-5 py-4 font-semibold text-neutral-900">
                     ${parseFloat(order.totalAmount.toString()).toFixed(2)}
+                  </td>
+                  <td className="px-5 py-4">
+                    <PaymentStatusBadge status={order.status || 'pending'} />
                   </td>
                   <td className="px-5 py-4">
                     <OrderStatusSelect
