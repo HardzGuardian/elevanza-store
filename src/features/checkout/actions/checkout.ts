@@ -5,7 +5,7 @@ import { auth } from '@/core/auth/auth';
 import { db } from '@/core/db';
 import { orders, orderItems, products, festivals } from '@/core/db/schema';
 import { revalidatePath, revalidateTag } from 'next/cache';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, and } from 'drizzle-orm';
 import { calculateBestPrice } from '@/features/shop/services/pricing';
 import { STOREFRONT_TAGS } from '@/features/shop/services/data';
 
@@ -111,5 +111,65 @@ export async function createCheckoutSession(cartItems: any[]) {
     console.error('Stripe error:', error?.message || error);
     await db.delete(orders).where(eq(orders.id, orderId));
     throw new Error(`Stripe: ${error?.message || 'Failed to create checkout session'}`);
+  }
+}
+
+export async function retryCheckout(orderId: number): Promise<{ url: string | null; error?: string }> {
+  const session = await auth();
+  if (!session?.user) return { url: null, error: 'Not authenticated' };
+
+  const userId = Number.parseInt(session.user.id, 10);
+
+  // Verify order belongs to user and is still pending
+  const [order] = await db
+    .select()
+    .from(orders)
+    .where(and(eq(orders.id, orderId), eq(orders.userId, userId), eq(orders.status, 'pending')))
+    .limit(1);
+
+  if (!order) return { url: null, error: 'Order not found or no longer pending' };
+
+  // Fetch existing order items with product details
+  const items = await db
+    .select({
+      productId: orderItems.productId,
+      quantity:  orderItems.quantity,
+      price:     orderItems.price,
+      name:      products.name,
+      image:     products.image,
+    })
+    .from(orderItems)
+    .innerJoin(products, eq(orderItems.productId, products.id))
+    .where(eq(orderItems.orderId, orderId));
+
+  if (items.length === 0) return { url: null, error: 'No items found' };
+
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+  try {
+    const stripeSession = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: items.map(item => ({
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: item.name,
+            images: item.image?.startsWith('https://') ? [item.image] : [],
+          },
+          unit_amount: Math.max(Math.round(Number(item.price) * 100), 50),
+        },
+        quantity: item.quantity,
+      })),
+      mode: 'payment',
+      success_url: `${appUrl}/checkout/success?orderId=${orderId}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url:  `${appUrl}/cart?cancelled=true&orderId=${orderId}`,
+      metadata: { userId: String(userId), orderId: String(orderId) },
+    });
+
+    return { url: stripeSession.url };
+  } catch (error: any) {
+    return { url: null, error: error?.message || 'Failed to create checkout session' };
   }
 }

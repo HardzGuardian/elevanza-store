@@ -7,6 +7,7 @@ import { Package, Calendar, User, ShoppingBag, CheckCircle2, Circle, XCircle, Cl
 import { AccountSettingsForm } from "@/features/account/components/AccountSettingsForm";
 import { UserRealtimeListener } from "@/features/account/components/UserRealtimeListener";
 import { Container } from "@/components/layout/Container";
+import { RetryPaymentButton } from "@/features/checkout/components/RetryPaymentButton";
 
 // The shipping pipeline order
 const PIPELINE = [
@@ -123,11 +124,14 @@ function CancelledBanner() {
   );
 }
 
-function PendingBanner() {
+function PendingBanner({ orderId }: { orderId: number }) {
   return (
-    <div className="px-5 py-3 border-t border-amber-50 bg-amber-50 flex items-center gap-2.5">
+    <div className="px-5 py-3 border-t border-amber-100 bg-amber-50 flex items-center gap-2.5">
       <Clock className="w-4 h-4 text-amber-500 flex-shrink-0" strokeWidth={1.5} />
-      <p className="text-xs font-medium text-amber-700">Payment not yet confirmed. Complete your checkout to continue.</p>
+      <p className="text-xs font-medium text-amber-700 flex-1">
+        Payment not yet confirmed. This order will be cancelled in 5 minutes.
+      </p>
+      <RetryPaymentButton orderId={orderId} />
     </div>
   );
 }
@@ -248,7 +252,7 @@ export default async function ProfilePage() {
                       )}
 
                       {/* Tracking timeline */}
-                      {status === 'pending'   && <PendingBanner />}
+                      {status === 'pending'   && <PendingBanner orderId={order.id} />}
                       {status === 'cancelled' && <CancelledBanner />}
                       {status !== 'pending' && status !== 'cancelled' && (
                         <OrderTracker status={status} />
