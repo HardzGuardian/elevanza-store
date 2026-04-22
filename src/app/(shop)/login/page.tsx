@@ -66,14 +66,9 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-neutral-500">
-                  Password
-                </Label>
-                <Link href="/forgot-password" className="text-[11px] font-medium text-neutral-500 hover:text-neutral-900 transition-colors">
-                  Forgot password?
-                </Link>
-              </div>
+              <Label htmlFor="password" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-neutral-500">
+                Password
+              </Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -91,6 +86,11 @@ export default function LoginPage() {
                 >
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
+              </div>
+              <div className="flex justify-end pt-0.5">
+                <Link href="/forgot-password" className="text-[11px] font-medium text-neutral-400 hover:text-neutral-900 transition-colors">
+                  Forgot password?
+                </Link>
               </div>
             </div>
 
