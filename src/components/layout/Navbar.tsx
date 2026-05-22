@@ -243,10 +243,11 @@ function SearchOverlay({ inputRef, query, results, onChange, onSubmit, onClose }
                 value={query}
                 onChange={e => onChange(e.target.value)}
                 placeholder="Search products…"
+                aria-label="Search products"
                 className="w-full text-[15px] font-medium text-neutral-900 placeholder:text-neutral-400 bg-transparent focus:outline-none"
               />
             </form>
-            <button onClick={onClose} className="p-2 text-neutral-400 hover:text-neutral-900 transition-colors flex-shrink-0">
+            <button onClick={onClose} aria-label="Close search" className="p-2 text-neutral-400 hover:text-neutral-900 transition-colors flex-shrink-0">
               <X className="w-5 h-5" />
             </button>
           </div>

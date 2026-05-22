@@ -36,6 +36,7 @@ export function OrderStatusSelect({ orderId, currentStatus }: { orderId: number;
       value={status}
       disabled={loading}
       onChange={e => handleChange(e.target.value)}
+      aria-label="Order status"
       className={cn(
         'rounded-lg px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] border outline-none cursor-pointer transition-colors disabled:opacity-50',
         STATUS_STYLES[status] || 'bg-neutral-50 text-neutral-600 border-neutral-200'

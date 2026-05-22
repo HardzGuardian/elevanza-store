@@ -40,7 +40,7 @@ export function OptimizedImage({ src, className, fill, priority, alt, ...props }
       <div className={cn('relative overflow-hidden', fill ? 'h-full w-full' : '', className)}>
         <Image
           src={src}
-          alt={alt || 'Image'}
+          alt={alt || ''}
           fill={fill}
           priority={priority}
           className={cn(
@@ -65,7 +65,7 @@ export function OptimizedImage({ src, className, fill, priority, alt, ...props }
         quality="auto"
         crop="fill"
         gravity="auto"
-        alt={alt || 'Image'}
+        alt={alt || ''}
         {...props}
         className={cn(
           'duration-700 ease-in-out transition-all',

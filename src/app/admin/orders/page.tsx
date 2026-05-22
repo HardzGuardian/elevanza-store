@@ -223,6 +223,8 @@ export default async function AdminOrdersPage({
               <Link
                 href={pageUrl(page - 1)}
                 aria-disabled={page <= 1}
+                aria-label="Previous page"
+                tabIndex={page <= 1 ? -1 : undefined}
                 className={`p-1.5 rounded-lg border border-neutral-200 transition-colors ${page <= 1 ? 'pointer-events-none opacity-30' : 'hover:bg-neutral-100'}`}
               >
                 <ChevronLeft className="w-3.5 h-3.5 text-neutral-600" />
@@ -230,6 +232,8 @@ export default async function AdminOrdersPage({
               <Link
                 href={pageUrl(page + 1)}
                 aria-disabled={page >= totalPages}
+                aria-label="Next page"
+                tabIndex={page >= totalPages ? -1 : undefined}
                 className={`p-1.5 rounded-lg border border-neutral-200 transition-colors ${page >= totalPages ? 'pointer-events-none opacity-30' : 'hover:bg-neutral-100'}`}
               >
                 <ChevronRight className="w-3.5 h-3.5 text-neutral-600" />
