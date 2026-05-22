@@ -6,7 +6,7 @@ import { inArray } from 'drizzle-orm';
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const raw = searchParams.get('ids') || '';
-  const ids = raw.split(',').map(Number).filter(n => !isNaN(n) && n > 0);
+  const ids = raw.split(',').map(Number).filter(n => !isNaN(n) && n > 0).slice(0, 50);
 
   if (ids.length === 0) return NextResponse.json([]);
 
