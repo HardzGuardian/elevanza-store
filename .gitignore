@@ -51,9 +51,7 @@ backups/
 *.sql
 
 # Windows batch files (local tools only)
-admin.bat
-database-manager.bat
-first-time-setup.bat
+*.bat
 
 # Claude AI files
 CLAUDE.md
