@@ -1,30 +1,32 @@
 import Link from 'next/link';
 import { db } from '@/core/db';
 import { orders, orderItems, products } from '@/core/db/schema';
-import { eq } from 'drizzle-orm';
-import { notFound } from 'next/navigation';
+import { eq, and } from 'drizzle-orm';
+import { notFound, redirect } from 'next/navigation';
 import { CheckCircle2, Package, ArrowRight, ShoppingBag } from 'lucide-react';
 import { Container } from '@/components/layout/Container';
 import { CartClearer } from '@/features/checkout/components/CartClearer';
+import { auth } from '@/core/auth/auth';
 
 interface SuccessPageProps {
   searchParams: Promise<{ orderId?: string; session_id?: string }>;
 }
 
 export default async function SuccessPage({ searchParams }: SuccessPageProps) {
+  const session = await auth();
+  if (!session?.user?.id) redirect('/login');
+  const userId = session.user.id;
+
   const params  = await searchParams;
   const orderId = params.orderId ? parseInt(params.orderId) : null;
   if (!orderId) notFound();
 
-  const [order] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
+  const [order] = await db
+    .select()
+    .from(orders)
+    .where(and(eq(orders.id, orderId), eq(orders.userId, userId)))
+    .limit(1);
   if (!order) notFound();
-
-  // Stripe redirects here only after a successful payment.
-  // Mark as completed if still pending (fallback in case webhook is delayed/misconfigured).
-  if (order.status === 'pending' && params.session_id) {
-    await db.update(orders).set({ status: 'processing' }).where(eq(orders.id, orderId));
-    order.status = 'processing';
-  }
 
   const items = await db
     .select({
