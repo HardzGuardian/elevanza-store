@@ -17,8 +17,9 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   if (!session?.user?.id) redirect('/login');
   const userId = session.user.id;
 
-  const params  = await searchParams;
-  const orderId = params.orderId ? parseInt(params.orderId) : null;
+  const params      = await searchParams;
+  const orderIdNum  = params.orderId ? parseInt(params.orderId, 10) : NaN;
+  const orderId     = Number.isFinite(orderIdNum) && orderIdNum > 0 ? orderIdNum : null;
   if (!orderId) notFound();
 
   const [order] = await db

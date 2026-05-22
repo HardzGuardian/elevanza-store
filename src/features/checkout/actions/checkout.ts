@@ -146,8 +146,6 @@ export async function retryCheckout(orderId: number): Promise<{ url: string | nu
 
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
 
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
   try {
     const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
