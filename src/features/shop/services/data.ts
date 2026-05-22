@@ -5,8 +5,6 @@ import { and, desc, eq, gt, gte, like, lte, or, asc } from 'drizzle-orm';
 
 import { db } from '@/core/db';
 import { categories, contentPages, festivals, products, settings } from '@/core/db/schema';
-import { initializeDatabase } from '@/core/db/init';
-
 // Standardized Types
 import { PublicProductFilters, NormalizedProductFilters } from '@/core/types/filters';
 import { Product, StoreSettings, Category, Festival } from '@/core/types';
@@ -54,8 +52,6 @@ function normalizeProductFilters(filters: PublicProductFilters): NormalizedProdu
 const getStorefrontShellCached = unstable_cache(
   async () => {
     try {
-      await initializeDatabase();
-      
       const [storeSettingsResult, activeFestivalResult, allCategories] = await Promise.all([
         db.select().from(settings).limit(1),
         db.select().from(festivals).where(eq(festivals.isActive, true)).limit(1),
@@ -288,8 +284,6 @@ export async function getQuickProductSearchResults(query: string) {
 
 const getVisibleContentPagesCached = unstable_cache(
   async () => {
-    await initializeDatabase();
-
     return db
       .select({
         id: contentPages.id,
@@ -314,8 +308,6 @@ export async function getVisibleContentPages() {
 
 const getContentPageBySlugCached = unstable_cache(
   async (slug: string) => {
-    await initializeDatabase();
-
     const [page] = await db
       .select()
       .from(contentPages)

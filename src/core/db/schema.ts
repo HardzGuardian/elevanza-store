@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, text, decimal, boolean, timestamp, pgEnum, integer } from 'drizzle-orm/pg-core';
+import { pgTable, serial, varchar, text, decimal, boolean, timestamp, pgEnum, integer, unique } from 'drizzle-orm/pg-core';
 import { relations, sql } from 'drizzle-orm';
 
 export const roleEnum = pgEnum('role', ['admin', 'customer']);
@@ -145,7 +145,10 @@ export const wishlists = pgTable('wishlists', {
   userId:    integer('user_id').notNull().references(() => users.id),
   productId: integer('product_id').notNull().references(() => products.id),
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
-});
+}, (table) => [
+  // Run: npx drizzle-kit push  (or generate a migration) after this change
+  unique().on(table.userId, table.productId),
+]);
 
 export const wishlistsRelations = relations(wishlists, ({ one }) => ({
   user:    one(users,    { fields: [wishlists.userId],    references: [users.id]    }),
