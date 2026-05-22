@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { calculateBestPrice, formatPrice } from '@/features/shop/services/pricing';
 import { notFound } from 'next/navigation';
 import { OptimizedImage } from '@/components/ui/optimized-image';
@@ -10,6 +11,23 @@ import Link from 'next/link';
 
 interface ProductDetailPageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const productId = parseInt(id, 10);
+  if (!Number.isFinite(productId)) return {};
+  const product = await getPublicProductById(productId);
+  if (!product) return {};
+  return {
+    title: product.name,
+    description: product.description?.slice(0, 160) || `Shop ${product.name} at our store`,
+    openGraph: {
+      title: product.name,
+      description: product.description?.slice(0, 160) || `Shop ${product.name}`,
+      images: product.image ? [{ url: product.image, alt: product.name }] : [],
+    },
+  };
 }
 
 const VALUE_PROPS = [
