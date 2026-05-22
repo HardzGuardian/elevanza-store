@@ -7,7 +7,35 @@ import { sendPasswordResetEmail } from '@/core/email/mailer';
 
 const SECRET = process.env.NEXTAUTH_SECRET!;
 
+// In-memory rate limiter: max 5 requests per IP per 15 minutes
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000; // 15 minutes
+  const maxRequests = 5;
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+  if (entry.count >= maxRequests) return false;
+  entry.count++;
+  return true;
+}
+
 export async function POST(req: Request) {
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+           || req.headers.get('x-real-ip')
+           || 'unknown';
+
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again in 15 minutes.' },
+      { status: 429, headers: { 'Retry-After': '900' } }
+    );
+  }
+
   const { email } = await req.json();
   if (!email) return NextResponse.json({ error: 'Email required' }, { status: 400 });
 

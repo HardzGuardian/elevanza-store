@@ -8,6 +8,13 @@ import bcrypt from 'bcryptjs';
 const SECRET = process.env.NEXTAUTH_SECRET!;
 
 export async function POST(req: Request) {
+  const origin = req.headers.get('origin');
+  const allowedOrigin = process.env.NEXT_PUBLIC_APP_URL || '';
+
+  if (origin && allowedOrigin && origin !== allowedOrigin) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const { token, password } = await req.json();
   if (!token || !password) return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   if (password.length < 8) return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
