@@ -6,6 +6,70 @@ import { settings } from "@/core/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { STOREFRONT_TAGS } from "@/features/shop/services/data";
+import { z } from "zod";
+
+const colorField = z
+  .string()
+  .regex(/^(#[0-9a-fA-F]{3,8}|rgb\([\d,\s]+\)|rgba\([\d,.\s]+\)|)$/)
+  .optional()
+  .nullable();
+
+const urlOrEmpty = z.string().url().optional().nullable().or(z.literal(""));
+
+const settingsSchema = z.object({
+  // Store basics
+  storeName: z.string().max(255).optional().nullable(),
+  storeEmail: z.string().email().optional().nullable().or(z.literal("")),
+
+  // Numeric / financial fields
+  shippingFee: z.coerce.number().min(0).max(99999).optional().nullable(),
+  taxRate: z.coerce.number().min(0).max(100).optional().nullable(),
+  freeShippingThreshold: z.coerce.number().min(0).max(99999).optional().nullable(),
+
+  // Hero / content strings
+  heroTitle: z.string().max(500).optional().nullable(),
+  heroSubtitle: z.string().max(1000).optional().nullable(),
+  heroImage: urlOrEmpty,
+
+  // Featured categories
+  featuredCategory1: z.string().max(255).optional().nullable(),
+  featuredCategory2: z.string().max(255).optional().nullable(),
+  featuredCategory3: z.string().max(255).optional().nullable(),
+
+  // Featured segments
+  featuredSegmentsTitle: z.string().max(500).optional().nullable(),
+  featuredSegmentsDescription: z.string().max(2000).optional().nullable(),
+  featuredSegmentsConfig: z.unknown().optional().nullable(),
+
+  // Colors / theme
+  primaryColor: colorField,
+  accentColor: colorField,
+  themePreset: z.string().max(100).optional().nullable(),
+
+  // Section visibility booleans
+  showHero: z.boolean().optional(),
+  showCategories: z.boolean().optional(),
+  showFeatures: z.boolean().optional(),
+  showNewsletter: z.boolean().optional(),
+  showNavCategories: z.boolean().optional(),
+
+  // Badge visibility
+  showSizeBadge: z.boolean().optional(),
+  showSaleBadge: z.boolean().optional(),
+  showNewBadge: z.boolean().optional(),
+
+  // Emergency notice
+  emergencyNoticeText: z.string().max(1000).optional().nullable(),
+  showEmergencyNotice: z.boolean().optional(),
+
+  // Social / footer
+  socialLinks: z.unknown().optional().nullable(),
+  footerShopLinks: z.unknown().optional().nullable(),
+  showFooterShop: z.boolean().optional(),
+  showFooterCompany: z.boolean().optional(),
+  showFooterSupport: z.boolean().optional(),
+  showFooterNewsletter: z.boolean().optional(),
+});
 
 /**
  * Internal: Admin Guard
@@ -27,45 +91,51 @@ export async function saveSettings(data: any) {
   try {
     await assertAdmin();
 
+    const parsed = settingsSchema.safeParse(data);
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.flatten().fieldErrors };
+    }
+    const d = parsed.data;
+
     // Attempt to update the existing singleton record (ID: 1) first
     const [updated] = await db.update(settings)
       .set({
-        storeName: data.storeName,
-        storeEmail: data.storeEmail,
-        shippingFee: (data.shippingFee || '0').toString(),
-        taxRate: (data.taxRate || '0').toString(),
-        freeShippingThreshold: (data.freeShippingThreshold || '0').toString(),
-        heroTitle: data.heroTitle,
-        heroSubtitle: data.heroSubtitle,
-        heroImage: data.heroImage,
-        featuredCategory1: data.featuredCategory1,
-        featuredCategory2: data.featuredCategory2,
-        featuredCategory3: data.featuredCategory3,
-        featuredSegmentsTitle: data.featuredSegmentsTitle,
-        featuredSegmentsDescription: data.featuredSegmentsDescription,
-        
-        primaryColor: data.primaryColor,
-        accentColor: data.accentColor,
-        themePreset: data.themePreset,
-        showHero: !!data.showHero,
-        showCategories: !!data.showCategories,
-        showFeatures: !!data.showFeatures,
-        showNewsletter: !!data.showNewsletter,
-        showNavCategories: !!data.showNavCategories,
-        
-        showSizeBadge: !!data.showSizeBadge,
-        showSaleBadge: !!data.showSaleBadge,
-        showNewBadge: !!data.showNewBadge,
-        
-        emergencyNoticeText: data.emergencyNoticeText,
-        showEmergencyNotice: !!data.showEmergencyNotice,
-        featuredSegmentsConfig: data.featuredSegmentsConfig,
-        socialLinks: data.socialLinks,
-        footerShopLinks: data.footerShopLinks,
-        showFooterShop: !!data.showFooterShop,
-        showFooterCompany: !!data.showFooterCompany,
-        showFooterSupport: !!data.showFooterSupport,
-        showFooterNewsletter: !!data.showFooterNewsletter,
+        storeName: d.storeName,
+        storeEmail: d.storeEmail,
+        shippingFee: (d.shippingFee ?? 0).toString(),
+        taxRate: (d.taxRate ?? 0).toString(),
+        freeShippingThreshold: (d.freeShippingThreshold ?? 0).toString(),
+        heroTitle: d.heroTitle,
+        heroSubtitle: d.heroSubtitle,
+        heroImage: d.heroImage,
+        featuredCategory1: d.featuredCategory1,
+        featuredCategory2: d.featuredCategory2,
+        featuredCategory3: d.featuredCategory3,
+        featuredSegmentsTitle: d.featuredSegmentsTitle,
+        featuredSegmentsDescription: d.featuredSegmentsDescription,
+
+        primaryColor: d.primaryColor,
+        accentColor: d.accentColor,
+        themePreset: d.themePreset,
+        showHero: !!d.showHero,
+        showCategories: !!d.showCategories,
+        showFeatures: !!d.showFeatures,
+        showNewsletter: !!d.showNewsletter,
+        showNavCategories: !!d.showNavCategories,
+
+        showSizeBadge: !!d.showSizeBadge,
+        showSaleBadge: !!d.showSaleBadge,
+        showNewBadge: !!d.showNewBadge,
+
+        emergencyNoticeText: d.emergencyNoticeText,
+        showEmergencyNotice: !!d.showEmergencyNotice,
+        featuredSegmentsConfig: d.featuredSegmentsConfig,
+        socialLinks: d.socialLinks,
+        footerShopLinks: d.footerShopLinks,
+        showFooterShop: !!d.showFooterShop,
+        showFooterCompany: !!d.showFooterCompany,
+        showFooterSupport: !!d.showFooterSupport,
+        showFooterNewsletter: !!d.showFooterNewsletter,
       })
       .where(eq(settings.id, 1))
       .returning();
@@ -75,42 +145,42 @@ export async function saveSettings(data: any) {
       await db.insert(settings)
         .values({
           id: 1,
-          storeName: data.storeName,
-          storeEmail: data.storeEmail,
-          shippingFee: (data.shippingFee || '0').toString(),
-          taxRate: (data.taxRate || '0').toString(),
-          freeShippingThreshold: (data.freeShippingThreshold || '0').toString(),
-          heroTitle: data.heroTitle,
-          heroSubtitle: data.heroSubtitle,
-          heroImage: data.heroImage,
-          featuredCategory1: data.featuredCategory1,
-          featuredCategory2: data.featuredCategory2,
-          featuredCategory3: data.featuredCategory3,
-          featuredSegmentsTitle: data.featuredSegmentsTitle,
-          featuredSegmentsDescription: data.featuredSegmentsDescription,
-          
-          primaryColor: data.primaryColor,
-          accentColor: data.accentColor,
-          themePreset: data.themePreset,
-          showHero: !!data.showHero,
-          showCategories: !!data.showCategories,
-          showFeatures: !!data.showFeatures,
-          showNewsletter: !!data.showNewsletter,
-          showNavCategories: !!data.showNavCategories,
-          
-          showSizeBadge: !!data.showSizeBadge,
-          showSaleBadge: !!data.showSaleBadge,
-          showNewBadge: !!data.showNewBadge,
-          
-          emergencyNoticeText: data.emergencyNoticeText,
-          showEmergencyNotice: !!data.showEmergencyNotice,
-          featuredSegmentsConfig: data.featuredSegmentsConfig,
-          socialLinks: data.socialLinks,
-          footerShopLinks: data.footerShopLinks,
-          showFooterShop: !!data.showFooterShop,
-          showFooterCompany: !!data.showFooterCompany,
-          showFooterSupport: !!data.showFooterSupport,
-          showFooterNewsletter: !!data.showFooterNewsletter,
+          storeName: d.storeName,
+          storeEmail: d.storeEmail,
+          shippingFee: (d.shippingFee ?? 0).toString(),
+          taxRate: (d.taxRate ?? 0).toString(),
+          freeShippingThreshold: (d.freeShippingThreshold ?? 0).toString(),
+          heroTitle: d.heroTitle,
+          heroSubtitle: d.heroSubtitle,
+          heroImage: d.heroImage,
+          featuredCategory1: d.featuredCategory1,
+          featuredCategory2: d.featuredCategory2,
+          featuredCategory3: d.featuredCategory3,
+          featuredSegmentsTitle: d.featuredSegmentsTitle,
+          featuredSegmentsDescription: d.featuredSegmentsDescription,
+
+          primaryColor: d.primaryColor,
+          accentColor: d.accentColor,
+          themePreset: d.themePreset,
+          showHero: !!d.showHero,
+          showCategories: !!d.showCategories,
+          showFeatures: !!d.showFeatures,
+          showNewsletter: !!d.showNewsletter,
+          showNavCategories: !!d.showNavCategories,
+
+          showSizeBadge: !!d.showSizeBadge,
+          showSaleBadge: !!d.showSaleBadge,
+          showNewBadge: !!d.showNewBadge,
+
+          emergencyNoticeText: d.emergencyNoticeText,
+          showEmergencyNotice: !!d.showEmergencyNotice,
+          featuredSegmentsConfig: d.featuredSegmentsConfig,
+          socialLinks: d.socialLinks,
+          footerShopLinks: d.footerShopLinks,
+          showFooterShop: !!d.showFooterShop,
+          showFooterCompany: !!d.showFooterCompany,
+          showFooterSupport: !!d.showFooterSupport,
+          showFooterNewsletter: !!d.showFooterNewsletter,
         });
     }
 
