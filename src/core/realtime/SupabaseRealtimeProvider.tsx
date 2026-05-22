@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { supabase } from '../supabase/client';
 import { SupabaseClient } from '@supabase/supabase-js';
 
@@ -36,18 +36,29 @@ export function useTableSubscription(
 ) {
   const supabase = useSupabaseRealtime();
 
+  // Keep a ref to the latest callback so the subscription effect never needs
+  // to re-run when the caller passes a new inline arrow function. Without this,
+  // every render would teardown and recreate the WebSocket channel.
+  const callbackRef = useRef(callback);
+  useEffect(() => {
+    callbackRef.current = callback;
+  });
+
   useEffect(() => {
     const channel = supabase
       .channel(`public:${tableName}:${eventName}`)
       .on(
-        'postgres_changes', 
-        { event: eventName, schema: 'public', table: tableName }, 
-        (payload) => callback(payload)
+        'postgres_changes',
+        { event: eventName, schema: 'public', table: tableName },
+        (payload) => callbackRef.current(payload)
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, tableName, eventName, callback]);
+    // callback is intentionally omitted: the callbackRef sync effect above
+    // keeps callbackRef.current up-to-date on every render without causing
+    // this subscription effect to re-run and churn the WebSocket channel.
+  }, [supabase, tableName, eventName]);
 }
