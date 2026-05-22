@@ -3,21 +3,11 @@
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
-import { auth } from '@/core/auth/auth';
 import { db } from '@/core/db';
+import { assertAdmin } from '@/core/auth/guards';
 import { users } from '@/core/db/schema';
 
 type CustomerRole = 'admin' | 'customer';
-
-async function assertAdmin() {
-  const session = await auth();
-
-  if (!session?.user || session.user.role !== 'admin') {
-    throw new Error('Admin access required');
-  }
-
-  return session.user;
-}
 
 export async function updateCustomerRole(userId: number, role: CustomerRole) {
   try {

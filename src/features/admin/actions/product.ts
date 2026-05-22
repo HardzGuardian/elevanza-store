@@ -1,12 +1,12 @@
 "use server";
 
-import { auth } from "@/core/auth/auth";
 import { db } from "@/core/db";
 import { products } from "@/core/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { STOREFRONT_TAGS, getQuickProductSearchResults } from "@/features/shop/services/data";
 import { z } from "zod";
+import { assertAdmin } from "@/core/auth/guards";
 
 const productSchema = z.object({
   name: z.string().min(1, "Name is required").max(255),
@@ -20,13 +20,6 @@ const productSchema = z.object({
   image: z.string().url().optional().nullable().or(z.literal("")),
   sizes: z.string().max(500).optional().nullable(),
 });
-
-async function assertAdmin() {
-  const session = await auth();
-  if (!session?.user || session.user.role !== 'admin') {
-    throw new Error('Admin access required');
-  }
-}
 
 export async function createProduct(data: any) {
   await assertAdmin();

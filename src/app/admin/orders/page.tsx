@@ -6,6 +6,7 @@ import { PaymentStatusBadge } from '@/features/admin/components/PaymentStatusBad
 import { Package, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/core/utils';
+import { formatMoney } from '@/lib/money';
 
 const PAGE_SIZE = 20;
 
@@ -185,7 +186,7 @@ export default async function AdminOrdersPage({
                       : '—'}
                   </td>
                   <td className="px-5 py-4 font-semibold text-neutral-900">
-                    ${parseFloat(row.totalAmount.toString()).toFixed(2)}
+                    ${formatMoney(row.totalAmount)}
                   </td>
                   <td className="px-5 py-4">
                     <PaymentStatusBadge status={row.status || 'pending'} />

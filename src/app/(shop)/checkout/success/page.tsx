@@ -7,6 +7,7 @@ import { CheckCircle2, Package, ArrowRight, ShoppingBag } from 'lucide-react';
 import { Container } from '@/components/layout/Container';
 import { CartClearer } from '@/features/checkout/components/CartClearer';
 import { auth } from '@/core/auth/auth';
+import { formatMoney } from '@/lib/money';
 
 interface SuccessPageProps {
   searchParams: Promise<{ orderId?: string; session_id?: string }>;
@@ -85,7 +86,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
                     <span className="text-sm font-medium text-neutral-700">{item.productName}</span>
                   </div>
                   <span className="text-sm font-semibold text-neutral-900 flex-shrink-0">
-                    ${(parseFloat(item.price.toString()) * item.quantity).toFixed(2)}
+                    ${formatMoney(parseFloat(String(item.price)) * item.quantity)}
                   </span>
                 </div>
               ))}
@@ -98,7 +99,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
                   Total Paid
                 </p>
                 <p className="text-2xl font-bold text-neutral-900">
-                  ${parseFloat(order.totalAmount.toString()).toFixed(2)}
+                  ${formatMoney(order.totalAmount)}
                 </p>
               </div>
               <span className="px-3 py-1.5 bg-green-50 text-green-700 border border-green-100 text-[10px] font-bold uppercase tracking-wider rounded-lg">

@@ -1,9 +1,9 @@
 'use server';
 
-import { auth } from "@/core/auth/auth";
 import { db } from "@/core/db";
 import { settings } from "@/core/db/schema";
-import { eq } from "drizzle-orm";
+
+import { assertAdmin } from "@/core/auth/guards";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { STOREFRONT_TAGS } from "@/features/shop/services/data";
 import { z } from "zod";
@@ -72,20 +72,8 @@ const settingsSchema = z.object({
 });
 
 /**
- * Internal: Admin Guard
- * Ensures that only authenticated administrators can modify global store settings.
- */
-async function assertAdmin() {
-  const session = await auth();
-
-  if (!session?.user || session.user.role !== 'admin') {
-    throw new Error('Admin access required');
-  }
-}
-
-/**
  * Persistence: Save Store Configuration
- * Updates or inserts the singleton settings record (ID: 1).
+ * Upserts the singleton settings record (ID: 1).
  */
 export async function saveSettings(data: any) {
   try {
@@ -97,92 +85,48 @@ export async function saveSettings(data: any) {
     }
     const d = parsed.data;
 
-    // Attempt to update the existing singleton record (ID: 1) first
-    const [updated] = await db.update(settings)
-      .set({
-        storeName: d.storeName,
-        storeEmail: d.storeEmail,
-        shippingFee: (d.shippingFee ?? 0).toString(),
-        taxRate: (d.taxRate ?? 0).toString(),
-        freeShippingThreshold: (d.freeShippingThreshold ?? 0).toString(),
-        heroTitle: d.heroTitle,
-        heroSubtitle: d.heroSubtitle,
-        heroImage: d.heroImage,
-        featuredCategory1: d.featuredCategory1,
-        featuredCategory2: d.featuredCategory2,
-        featuredCategory3: d.featuredCategory3,
-        featuredSegmentsTitle: d.featuredSegmentsTitle,
-        featuredSegmentsDescription: d.featuredSegmentsDescription,
+    const settingsPayload = {
+      storeName: d.storeName,
+      storeEmail: d.storeEmail,
+      shippingFee: (d.shippingFee ?? 0).toString(),
+      taxRate: (d.taxRate ?? 0).toString(),
+      freeShippingThreshold: (d.freeShippingThreshold ?? 0).toString(),
+      heroTitle: d.heroTitle,
+      heroSubtitle: d.heroSubtitle,
+      heroImage: d.heroImage,
+      featuredCategory1: d.featuredCategory1,
+      featuredCategory2: d.featuredCategory2,
+      featuredCategory3: d.featuredCategory3,
+      featuredSegmentsTitle: d.featuredSegmentsTitle,
+      featuredSegmentsDescription: d.featuredSegmentsDescription,
 
-        primaryColor: d.primaryColor,
-        accentColor: d.accentColor,
-        themePreset: d.themePreset,
-        showHero: !!d.showHero,
-        showCategories: !!d.showCategories,
-        showFeatures: !!d.showFeatures,
-        showNewsletter: !!d.showNewsletter,
-        showNavCategories: !!d.showNavCategories,
+      primaryColor: d.primaryColor,
+      accentColor: d.accentColor,
+      themePreset: d.themePreset,
+      showHero: !!d.showHero,
+      showCategories: !!d.showCategories,
+      showFeatures: !!d.showFeatures,
+      showNewsletter: !!d.showNewsletter,
+      showNavCategories: !!d.showNavCategories,
 
-        showSizeBadge: !!d.showSizeBadge,
-        showSaleBadge: !!d.showSaleBadge,
-        showNewBadge: !!d.showNewBadge,
+      showSizeBadge: !!d.showSizeBadge,
+      showSaleBadge: !!d.showSaleBadge,
+      showNewBadge: !!d.showNewBadge,
 
-        emergencyNoticeText: d.emergencyNoticeText,
-        showEmergencyNotice: !!d.showEmergencyNotice,
-        featuredSegmentsConfig: d.featuredSegmentsConfig,
-        socialLinks: d.socialLinks,
-        footerShopLinks: d.footerShopLinks,
-        showFooterShop: !!d.showFooterShop,
-        showFooterCompany: !!d.showFooterCompany,
-        showFooterSupport: !!d.showFooterSupport,
-        showFooterNewsletter: !!d.showFooterNewsletter,
-      })
-      .where(eq(settings.id, 1))
-      .returning();
+      emergencyNoticeText: d.emergencyNoticeText,
+      showEmergencyNotice: !!d.showEmergencyNotice,
+      featuredSegmentsConfig: d.featuredSegmentsConfig,
+      socialLinks: d.socialLinks,
+      footerShopLinks: d.footerShopLinks,
+      showFooterShop: !!d.showFooterShop,
+      showFooterCompany: !!d.showFooterCompany,
+      showFooterSupport: !!d.showFooterSupport,
+      showFooterNewsletter: !!d.showFooterNewsletter,
+    };
 
-    // If no record was updated, it means we need to insert it for the first time
-    if (!updated) {
-      await db.insert(settings)
-        .values({
-          id: 1,
-          storeName: d.storeName,
-          storeEmail: d.storeEmail,
-          shippingFee: (d.shippingFee ?? 0).toString(),
-          taxRate: (d.taxRate ?? 0).toString(),
-          freeShippingThreshold: (d.freeShippingThreshold ?? 0).toString(),
-          heroTitle: d.heroTitle,
-          heroSubtitle: d.heroSubtitle,
-          heroImage: d.heroImage,
-          featuredCategory1: d.featuredCategory1,
-          featuredCategory2: d.featuredCategory2,
-          featuredCategory3: d.featuredCategory3,
-          featuredSegmentsTitle: d.featuredSegmentsTitle,
-          featuredSegmentsDescription: d.featuredSegmentsDescription,
-
-          primaryColor: d.primaryColor,
-          accentColor: d.accentColor,
-          themePreset: d.themePreset,
-          showHero: !!d.showHero,
-          showCategories: !!d.showCategories,
-          showFeatures: !!d.showFeatures,
-          showNewsletter: !!d.showNewsletter,
-          showNavCategories: !!d.showNavCategories,
-
-          showSizeBadge: !!d.showSizeBadge,
-          showSaleBadge: !!d.showSaleBadge,
-          showNewBadge: !!d.showNewBadge,
-
-          emergencyNoticeText: d.emergencyNoticeText,
-          showEmergencyNotice: !!d.showEmergencyNotice,
-          featuredSegmentsConfig: d.featuredSegmentsConfig,
-          socialLinks: d.socialLinks,
-          footerShopLinks: d.footerShopLinks,
-          showFooterShop: !!d.showFooterShop,
-          showFooterCompany: !!d.showFooterCompany,
-          showFooterSupport: !!d.showFooterSupport,
-          showFooterNewsletter: !!d.showFooterNewsletter,
-        });
-    }
+    await db.insert(settings)
+      .values({ id: 1, ...settingsPayload })
+      .onConflictDoUpdate({ target: settings.id, set: settingsPayload });
 
     // Revalidate relevant cache paths and tags
     revalidatePath("/admin/settings");

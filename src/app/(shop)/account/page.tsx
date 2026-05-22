@@ -8,6 +8,7 @@ import { AccountSettingsForm } from "@/features/account/components/AccountSettin
 import { UserRealtimeListener } from "@/features/account/components/UserRealtimeListener";
 import { Container } from "@/components/layout/Container";
 import { RetryPaymentButton } from "@/features/checkout/components/RetryPaymentButton";
+import { formatMoney } from "@/lib/money";
 
 // The shipping pipeline order
 const PIPELINE = [
@@ -226,7 +227,7 @@ export default async function ProfilePage() {
                         </div>
                         <div className="flex items-center gap-3">
                           <p className="text-base font-bold text-neutral-900">
-                            ${parseFloat(order.totalAmount.toString()).toFixed(2)}
+                            ${formatMoney(order.totalAmount)}
                           </p>
                           <StatusBadge status={status} />
                         </div>
@@ -244,7 +245,7 @@ export default async function ProfilePage() {
                                 <span className="font-medium">{item.productName}</span>
                               </div>
                               <span className="text-neutral-500 text-xs font-medium">
-                                ${(parseFloat(item.price.toString()) * item.quantity).toFixed(2)}
+                                ${formatMoney(parseFloat(String(item.price)) * item.quantity)}
                               </span>
                             </div>
                           ))}

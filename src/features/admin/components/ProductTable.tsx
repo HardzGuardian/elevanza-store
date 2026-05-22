@@ -1,14 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ProductForm } from './ProductForm';
-import { deleteProduct } from '@/features/admin/actions/product';
+import { deleteProduct, bulkDeleteProducts } from '@/features/admin/actions/product';
 import { toast } from 'react-hot-toast';
 import { cn } from '@/core/utils';
+import { formatMoney } from '@/lib/money';
 
 interface ProductTableProps {
   products: any[];
@@ -16,15 +17,44 @@ interface ProductTableProps {
 }
 
 export function ProductTable({ products: initialProducts, categoriesList }: ProductTableProps) {
-  const [products, setProducts]               = useState(initialProducts);
-  const [isAddOpen,       setIsAddOpen]       = useState(false);
-  const [editingProduct,  setEditingProduct]  = useState<any>(null);
-  const [searchQuery,     setSearchQuery]     = useState('');
+  const [products, setProducts]              = useState(initialProducts);
+  const [isAddOpen,      setIsAddOpen]       = useState(false);
+  const [editingProduct, setEditingProduct]  = useState<any>(null);
+  const [searchQuery,    setSearchQuery]     = useState('');
+  const [sortField,      setSortField]       = useState<'name' | 'price' | 'stock' | null>(null);
+  const [sortDir,        setSortDir]         = useState<'asc' | 'desc'>('asc');
+  const [selectedIds,    setSelectedIds]     = useState<Set<number>>(new Set());
+  const [bulkLoading,    setBulkLoading]     = useState(false);
 
-  const filtered = products.filter(p =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  function toggleSort(field: 'name' | 'price' | 'stock') {
+    if (sortField === field) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDir('asc');
+    }
+  }
+
+  const filtered = products
+    .filter(p =>
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.category.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (!sortField) return 0;
+      let va = a[sortField];
+      let vb = b[sortField];
+      if (sortField === 'price' || sortField === 'stock') {
+        va = parseFloat(va);
+        vb = parseFloat(vb);
+      } else {
+        va = va?.toLowerCase() ?? '';
+        vb = vb?.toLowerCase() ?? '';
+      }
+      if (va < vb) return sortDir === 'asc' ? -1 : 1;
+      if (va > vb) return sortDir === 'asc' ?  1 : -1;
+      return 0;
+    });
 
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this product?')) return;
@@ -32,10 +62,52 @@ export function ProductTable({ products: initialProducts, categoriesList }: Prod
     if (result.success) {
       toast.success('Product deleted');
       setProducts(prev => prev.filter(p => p.id !== id));
+      setSelectedIds(prev => { const next = new Set(prev); next.delete(id); return next; });
     } else {
       toast.error('Failed to delete');
     }
   };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Delete ${selectedIds.size} product${selectedIds.size !== 1 ? 's' : ''}? This cannot be undone.`)) return;
+    setBulkLoading(true);
+    const ids = Array.from(selectedIds);
+    const result = await bulkDeleteProducts(ids);
+    if (result.success) {
+      toast.success(`Deleted ${ids.length} product${ids.length !== 1 ? 's' : ''}`);
+      setProducts(prev => prev.filter(p => !ids.includes(p.id)));
+      setSelectedIds(new Set());
+    } else {
+      toast.error('Bulk delete failed');
+    }
+    setBulkLoading(false);
+  };
+
+  const allFilteredSelected = filtered.length > 0 && filtered.every(p => selectedIds.has(p.id));
+
+  function toggleRow(id: number) {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAll() {
+    if (allFilteredSelected) {
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        filtered.forEach(p => next.delete(p.id));
+        return next;
+      });
+    } else {
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        filtered.forEach(p => next.add(p.id));
+        return next;
+      });
+    }
+  }
 
   return (
     <div className="p-8 space-y-6">
@@ -68,8 +140,8 @@ export function ProductTable({ products: initialProducts, categoriesList }: Prod
 
       {/* Table card */}
       <div className="bg-white rounded-xl border border-neutral-100 overflow-hidden">
-        {/* Search bar */}
-        <div className="px-4 py-3 border-b border-neutral-100 flex gap-3">
+        {/* Search + bulk action bar */}
+        <div className="px-4 py-3 border-b border-neutral-100 flex items-center gap-3">
           <div className="relative flex-1 max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400" />
             <Input
@@ -79,9 +151,19 @@ export function ProductTable({ products: initialProducts, categoriesList }: Prod
               onChange={e => setSearchQuery(e.target.value)}
             />
           </div>
-          <span className="self-center text-xs text-neutral-400 font-medium ml-auto">
-            {filtered.length} / {initialProducts.length} products
-          </span>
+          {selectedIds.size > 0 ? (
+            <button
+              onClick={handleBulkDelete}
+              disabled={bulkLoading}
+              className="ml-auto inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 text-[12px] font-semibold hover:bg-red-100 transition-colors disabled:opacity-50"
+            >
+              {bulkLoading ? 'Deleting…' : `Delete ${selectedIds.size} selected`}
+            </button>
+          ) : (
+            <span className="ml-auto text-xs text-neutral-400 font-medium">
+              {filtered.length} / {initialProducts.length} products
+            </span>
+          )}
         </div>
 
         {/* Table */}
@@ -89,16 +171,59 @@ export function ProductTable({ products: initialProducts, categoriesList }: Prod
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-neutral-100">
-                {['Product', 'Category', 'Price', 'Stock', 'Tags', ''].map(h => (
-                  <th key={h} className="px-5 py-3.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400 last:text-right">
-                    {h}
-                  </th>
-                ))}
+                {/* Select-all checkbox */}
+                <th className="pl-5 pr-2 py-3.5 w-8">
+                  <input
+                    type="checkbox"
+                    checked={allFilteredSelected}
+                    onChange={toggleAll}
+                    className="w-3.5 h-3.5 rounded border-neutral-300 cursor-pointer"
+                  />
+                </th>
+                {/* Sortable: Name */}
+                <th className="px-5 py-3.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400">
+                  <button onClick={() => toggleSort('name')} className="flex items-center gap-1 hover:text-neutral-700 transition-colors">
+                    Product
+                    {sortField === 'name'
+                      ? sortDir === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                      : <ChevronsUpDown className="w-3 h-3 text-neutral-300" />}
+                  </button>
+                </th>
+                <th className="px-5 py-3.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400">Category</th>
+                {/* Sortable: Price */}
+                <th className="px-5 py-3.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400">
+                  <button onClick={() => toggleSort('price')} className="flex items-center gap-1 hover:text-neutral-700 transition-colors">
+                    Price
+                    {sortField === 'price'
+                      ? sortDir === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                      : <ChevronsUpDown className="w-3 h-3 text-neutral-300" />}
+                  </button>
+                </th>
+                {/* Sortable: Stock */}
+                <th className="px-5 py-3.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400">
+                  <button onClick={() => toggleSort('stock')} className="flex items-center gap-1 hover:text-neutral-700 transition-colors">
+                    Stock
+                    {sortField === 'stock'
+                      ? sortDir === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                      : <ChevronsUpDown className="w-3 h-3 text-neutral-300" />}
+                  </button>
+                </th>
+                <th className="px-5 py-3.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400">Tags</th>
+                <th className="px-5 py-3.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400 text-right"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-50">
               {filtered.map(product => (
-                <tr key={product.id} className="hover:bg-neutral-50/60 transition-colors">
+                <tr key={product.id} className={cn('hover:bg-neutral-50/60 transition-colors', selectedIds.has(product.id) && 'bg-neutral-50')}>
+                  {/* Row checkbox */}
+                  <td className="pl-5 pr-2 py-4">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(product.id)}
+                      onChange={() => toggleRow(product.id)}
+                      className="w-3.5 h-3.5 rounded border-neutral-300 cursor-pointer"
+                    />
+                  </td>
 
                   {/* Name + image */}
                   <td className="px-5 py-4">
@@ -121,7 +246,7 @@ export function ProductTable({ products: initialProducts, categoriesList }: Prod
 
                   {/* Price */}
                   <td className="px-5 py-4 font-semibold text-neutral-900">
-                    ${parseFloat(product.price.toString()).toFixed(2)}
+                    ${formatMoney(product.price)}
                   </td>
 
                   {/* Stock */}

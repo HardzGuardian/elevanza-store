@@ -1,20 +1,12 @@
 'use server';
 
-import { auth } from '@/core/auth/auth';
 import { db } from '@/core/db';
+import { assertAdmin } from '@/core/auth/guards';
 import { ensureContentPagesVisibilityColumn } from '@/core/db/ensure-content-pages-visibility';
 import { contentPages } from '@/core/db/schema';
 import { eq } from 'drizzle-orm';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { STOREFRONT_TAGS } from '@/features/shop/services/data';
-
-async function assertAdmin() {
-  const session = await auth();
-
-  if (!session?.user || session.user.role !== 'admin') {
-    throw new Error('Admin access required');
-  }
-}
 
 export async function getPage(slug: string) {
   try {
