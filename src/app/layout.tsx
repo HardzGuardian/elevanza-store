@@ -1,5 +1,12 @@
 export const dynamic = 'force-dynamic';
 
+function sanitizeColor(value: string | null | undefined, fallback: string): string {
+  if (!value) return fallback;
+  // Allow: #xxx, #xxxxxx, #xxxxxxxx, rgb(...), rgba(...), hsl(...), hsla(...)
+  const safe = /^#[0-9a-fA-F]{3,8}$|^rgba?\([\d,.\s%]+\)$|^hsla?\([\d,.\s%]+\)$/.test(value.trim());
+  return safe ? value.trim() : fallback;
+}
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
@@ -49,8 +56,8 @@ export default async function RootLayout({
     : [];
 
   // Design Logic
-  const primary = activeFestival?.primaryColor || storeSettings?.primaryColor || '#4f46e5';
-  const accent = activeFestival?.accentColor || storeSettings?.accentColor || '#818cf8';
+  const primary = sanitizeColor(activeFestival?.primaryColor || storeSettings?.primaryColor, '#4f46e5');
+  const accent = sanitizeColor(activeFestival?.accentColor || storeSettings?.accentColor, '#818cf8');
   const preset = activeFestival?.slug || storeSettings?.themePreset || 'default';
 
   // Generate dynamic styles based on brand/festival colors
