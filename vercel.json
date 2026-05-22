@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/cancel-pending-orders",
-      "schedule": "* * * * *"
+      "schedule": "*/5 * * * *"
     }
   ]
 }

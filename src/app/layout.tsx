@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic';
-
 function sanitizeColor(value: string | null | undefined, fallback: string): string {
   if (!value) return fallback;
   // Allow: #xxx, #xxxxxx, #xxxxxxxx, rgb(...), rgba(...), hsl(...), hsla(...)

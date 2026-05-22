@@ -6,6 +6,10 @@ const connectionString = process.env.DATABASE_URL!;
 
 // For serverless environments like Vercel, we can use a single connection or a pool.
 // Use 'postgres' for a robust managed connection.
-const client = postgres(connectionString);
+const client = postgres(connectionString, {
+  max: 1,
+  idle_timeout: 20,
+  connect_timeout: 10,
+});
 
 export const db = drizzle(client, { schema });
