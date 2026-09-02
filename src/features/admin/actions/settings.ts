@@ -39,7 +39,7 @@ const settingsSchema = z.object({
   // Featured segments
   featuredSegmentsTitle: z.string().max(500).optional().nullable(),
   featuredSegmentsDescription: z.string().max(2000).optional().nullable(),
-  featuredSegmentsConfig: z.unknown().optional().nullable(),
+  featuredSegmentsConfig: z.string().optional().nullable(),
 
   // Colors / theme
   primaryColor: colorField,
@@ -63,8 +63,8 @@ const settingsSchema = z.object({
   showEmergencyNotice: z.boolean().optional(),
 
   // Social / footer
-  socialLinks: z.unknown().optional().nullable(),
-  footerShopLinks: z.unknown().optional().nullable(),
+  socialLinks: z.string().optional().nullable(),
+  footerShopLinks: z.string().optional().nullable(),
   showFooterShop: z.boolean().optional(),
   showFooterCompany: z.boolean().optional(),
   showFooterSupport: z.boolean().optional(),
@@ -84,25 +84,30 @@ export async function saveSettings(data: any) {
       return { success: false, error: parsed.error.flatten().fieldErrors };
     }
     const d = parsed.data;
+    // Columns below are NOT NULL in the schema (each with its own factory
+    // default) — the Zod schema allows null for "clear this field" from the
+    // form, so coerce null/undefined to '' here rather than passing null
+    // through to a NOT NULL column.
+    const s = (v: string | null | undefined) => v ?? '';
 
     const settingsPayload = {
-      storeName: d.storeName,
-      storeEmail: d.storeEmail,
+      storeName: s(d.storeName),
+      storeEmail: s(d.storeEmail),
       shippingFee: (d.shippingFee ?? 0).toString(),
       taxRate: (d.taxRate ?? 0).toString(),
       freeShippingThreshold: (d.freeShippingThreshold ?? 0).toString(),
-      heroTitle: d.heroTitle,
-      heroSubtitle: d.heroSubtitle,
-      heroImage: d.heroImage,
-      featuredCategory1: d.featuredCategory1,
-      featuredCategory2: d.featuredCategory2,
-      featuredCategory3: d.featuredCategory3,
-      featuredSegmentsTitle: d.featuredSegmentsTitle,
-      featuredSegmentsDescription: d.featuredSegmentsDescription,
+      heroTitle: s(d.heroTitle),
+      heroSubtitle: s(d.heroSubtitle),
+      heroImage: s(d.heroImage),
+      featuredCategory1: s(d.featuredCategory1),
+      featuredCategory2: s(d.featuredCategory2),
+      featuredCategory3: s(d.featuredCategory3),
+      featuredSegmentsTitle: s(d.featuredSegmentsTitle),
+      featuredSegmentsDescription: s(d.featuredSegmentsDescription),
 
-      primaryColor: d.primaryColor,
-      accentColor: d.accentColor,
-      themePreset: d.themePreset,
+      primaryColor: s(d.primaryColor),
+      accentColor: s(d.accentColor),
+      themePreset: s(d.themePreset),
       showHero: !!d.showHero,
       showCategories: !!d.showCategories,
       showFeatures: !!d.showFeatures,

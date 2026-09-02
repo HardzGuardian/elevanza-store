@@ -16,7 +16,7 @@ interface SuccessPageProps {
 export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   const session = await auth();
   if (!session?.user?.id) redirect('/login');
-  const userId = session.user.id;
+  const userId = Number(session.user.id);
 
   const params      = await searchParams;
   const orderIdNum  = params.orderId ? parseInt(params.orderId, 10) : NaN;

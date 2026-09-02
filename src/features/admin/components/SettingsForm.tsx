@@ -146,7 +146,10 @@ export function SettingsForm({ initialSettings, categoriesList }: SettingsFormPr
         if (result.success) {
           toast.success('Configuration synchronized!');
         } else {
-          toast.error(result.error || 'Sync failed');
+          const message = typeof result.error === 'string'
+            ? result.error
+            : Object.values(result.error ?? {}).flat().filter(Boolean).join(', ') || 'Sync failed';
+          toast.error(message);
         }
       } catch (error) {
         console.error('Settings save error:', error);

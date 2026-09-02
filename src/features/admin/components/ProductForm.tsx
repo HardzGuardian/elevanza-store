@@ -58,7 +58,10 @@ export function ProductForm({ initialData, onSuccess, categoriesList }: ProductF
       toast.success(initialData ? 'Product updated!' : 'Product created!');
       onSuccess?.(result.product);
     } else {
-      toast.error(result.error || 'Something went wrong');
+      const message = typeof result.error === 'string'
+        ? result.error
+        : Object.values(result.error ?? {}).flat().filter(Boolean).join(', ') || 'Something went wrong';
+      toast.error(message);
     }
     setLoading(false);
   };
