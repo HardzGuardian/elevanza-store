@@ -53,6 +53,9 @@ backups/
 # Windows batch files (local tools only)
 *.bat
 
+# Accidental Windows null-device redirect artifact
+/nul
+
 # Claude AI files
 CLAUDE.md
 AGENTS.md
