@@ -3,6 +3,12 @@ import { redirect } from "next/navigation";
 import { AdminSidebar } from "@/features/admin/components/AdminSidebar";
 import { AdminTopbar } from "@/features/admin/components/AdminTopbar";
 
+// The entire /admin tree is behind auth and reads per-request session +
+// live data — it must never be statically prerendered. Without this,
+// Next.js can attempt to prerender admin pages at build time, which
+// requires a live DB connection just to complete a build.
+export const dynamic = 'force-dynamic';
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
 
