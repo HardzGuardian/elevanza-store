@@ -5,6 +5,7 @@ import { orders, orderItems, products } from '@/core/db/schema';
 import { eq, sql, and } from 'drizzle-orm';
 import { revalidatePath } from "next/cache";
 import { auth } from "@/core/auth/auth";
+import { assertAdmin } from "@/core/auth/guards";
 
 const VALID_ORDER_STATUSES = [
   'pending',
@@ -41,16 +42,6 @@ export async function cancelPendingOrder(orderId: number) {
   } catch (error) {
     console.error('cancelPendingOrder failed:', error);
     return { success: false };
-  }
-}
-
-async function assertAdmin() {
-  const session = await auth();
-  if (!session?.user) {
-    throw new Error('Unauthorized');
-  }
-  if ((session.user as { role?: string }).role !== 'admin') {
-    throw new Error('Forbidden: admin role required');
   }
 }
 
