@@ -2,7 +2,6 @@
 
 import { db } from '@/core/db';
 import { assertAdmin } from '@/core/auth/guards';
-import { ensureContentPagesVisibilityColumn } from '@/core/db/ensure-content-pages-visibility';
 import { contentPages } from '@/core/db/schema';
 import { eq } from 'drizzle-orm';
 import { revalidatePath, revalidateTag } from 'next/cache';
@@ -10,7 +9,6 @@ import { STOREFRONT_TAGS } from '@/features/shop/services/data';
 
 export async function getPage(slug: string) {
   try {
-    await ensureContentPagesVisibilityColumn();
     const [page] = await db
       .select()
       .from(contentPages)
@@ -25,7 +23,6 @@ export async function getPage(slug: string) {
 
 export async function getAllPages() {
   try {
-    await ensureContentPagesVisibilityColumn();
     return await db.select().from(contentPages);
   } catch (error) {
     console.error('Error fetching all pages:', error);
@@ -36,8 +33,7 @@ export async function getAllPages() {
 export async function createPage(slug: string, title: string, content: string = '', footerGroup: string = 'none') {
   try {
     await assertAdmin();
-    await ensureContentPagesVisibilityColumn();
-    
+
     await db.insert(contentPages).values({
       slug,
       title,
@@ -61,7 +57,6 @@ export async function createPage(slug: string, title: string, content: string = 
 export async function updatePage(slug: string, title: string, content: string, footerGroup: string = 'none') {
   try {
     await assertAdmin();
-    await ensureContentPagesVisibilityColumn();
     await db
       .update(contentPages)
       .set({ title, content, footerGroup })
@@ -93,7 +88,6 @@ export async function deletePage(slug: string) {
 export async function togglePageVisibility(slug: string, isVisible: boolean) {
   try {
     await assertAdmin();
-    await ensureContentPagesVisibilityColumn();
 
     await db
       .update(contentPages)
