@@ -5,6 +5,7 @@ import { categories, festivals } from "@/core/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { STOREFRONT_TAGS } from "@/features/shop/services/data";
+import { assertAdmin } from "@/core/auth/guards";
 
 // --- CATEGORIES ---
 export async function getCategories() {
@@ -12,6 +13,7 @@ export async function getCategories() {
 }
 
 export async function createCategory(data: { name: string; slug: string; image?: string }) {
+  await assertAdmin();
   try {
     const [category] = await db.insert(categories).values(data).returning();
     revalidatePath("/admin/taxonomy");
@@ -25,6 +27,7 @@ export async function createCategory(data: { name: string; slug: string; image?:
 }
 
 export async function deleteCategory(id: number) {
+  await assertAdmin();
   try {
     await db.delete(categories).where(eq(categories.id, id));
     revalidatePath("/admin/taxonomy");
@@ -42,9 +45,32 @@ export async function getFestivals() {
   return await db.select().from(festivals);
 }
 
-export async function createFestival(data: any) {
+interface FestivalInput {
+  name: string;
+  slug: string;
+  salePercentage: number | string;
+  promoMessage?: string;
+  primaryColor?: string;
+  accentColor?: string;
+}
+
+function toFestivalValues(data: FestivalInput) {
+  return {
+    name: data.name,
+    slug: data.slug,
+    salePercentage: parseInt(String(data.salePercentage), 10) || 0,
+    promoMessage: data.promoMessage,
+    primaryColor: data.primaryColor,
+    accentColor: data.accentColor,
+  };
+}
+
+export async function createFestival(data: FestivalInput) {
+  await assertAdmin();
   try {
-    const [festival] = await db.insert(festivals).values(data).returning();
+    const [festival] = await db.insert(festivals)
+      .values({ ...toFestivalValues(data), isActive: false })
+      .returning();
     revalidatePath("/admin/taxonomy");
     revalidatePath("/");
     revalidateTag(STOREFRONT_TAGS.festivals, {});
@@ -55,9 +81,10 @@ export async function createFestival(data: any) {
   }
 }
 
-export async function updateFestival(id: number, data: any) {
+export async function updateFestival(id: number, data: FestivalInput) {
+  await assertAdmin();
   try {
-    await db.update(festivals).set(data).where(eq(festivals.id, id));
+    await db.update(festivals).set(toFestivalValues(data)).where(eq(festivals.id, id));
     revalidatePath("/admin/taxonomy");
     revalidatePath("/");
     revalidateTag(STOREFRONT_TAGS.festivals, {});
@@ -69,6 +96,7 @@ export async function updateFestival(id: number, data: any) {
 }
 
 export async function deleteFestival(id: number) {
+  await assertAdmin();
   try {
     await db.delete(festivals).where(eq(festivals.id, id));
     revalidatePath("/admin/taxonomy");
@@ -82,6 +110,7 @@ export async function deleteFestival(id: number) {
 }
 
 export async function toggleFestival(id: number, active: boolean) {
+  await assertAdmin();
   try {
     // Disable all others first
     if (active) {

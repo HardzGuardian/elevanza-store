@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'react-hot-toast';
-import { createFestival, toggleFestival, deleteFestival } from '@/features/admin/actions/festival';
+import { createFestival, toggleFestival, deleteFestival } from '@/features/admin/actions/taxonomy';
 import { Plus, Trash2, Calendar, Sparkles, Power } from 'lucide-react';
 import { cn } from '@/core/utils';
 
