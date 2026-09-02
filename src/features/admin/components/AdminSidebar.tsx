@@ -20,8 +20,16 @@ const NAV_ITEMS = [
   { label: 'Settings',   href: '/admin/settings',   icon: Settings },
 ];
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  user?: { name?: string | null; email?: string | null };
+}
+
+export function AdminSidebar({ user }: AdminSidebarProps) {
   const pathname = usePathname();
+
+  const initials = user?.name
+    ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+    : (user?.email?.[0] ?? 'A').toUpperCase();
 
   return (
     <aside className="w-56 border-r border-neutral-100 bg-white flex flex-col h-full flex-shrink-0">
@@ -60,8 +68,25 @@ export function AdminSidebar() {
         })}
       </nav>
 
+      {/* User info */}
+      {user && (
+        <div className="px-4 py-3.5 border-t border-neutral-100 flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-neutral-900 text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0">
+            {initials}
+          </div>
+          <div className="flex-1 min-w-0">
+            {user.name && (
+              <p className="text-[12px] font-semibold text-neutral-900 truncate leading-none">{user.name}</p>
+            )}
+            {user.email && (
+              <p className="text-[10px] text-neutral-400 truncate mt-0.5">{user.email}</p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
-      <div className="px-3 py-4 border-t border-neutral-100 space-y-0.5">
+      <div className="px-3 py-3 border-t border-neutral-100 space-y-0.5">
         <Link
           href="/"
           target="_blank"
